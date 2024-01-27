@@ -1,2 +1,2 @@
 [workspace]
-members = ["note-sharing"]
+members = ["patterns/note-sharing"]

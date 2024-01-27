@@ -20,7 +20,7 @@ import {
   } from "@aztec/aztec.js";
   
 //   import { BetNote } from "./Notes.js";
-  import { SharedNoteContract } from "../../../artifacts/note-sharing/SharedNote.js";
+  import { SharedNoteContract } from "../../../../artifacts/note-sharing/SharedNote.js";
   import { SharedNote } from "../notes/Notes.js";
   import { createAccount, getInitialTestAccountsWallets } from "@aztec/accounts/testing";
   

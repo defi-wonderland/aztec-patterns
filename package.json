@@ -24,7 +24,7 @@
         "^(\\.{1,2}/.*)\\.js$": "$1"
       },
       "testRegex": "./src/.*\\.test\\.ts$",
-      "rootDir": "./"
+      "rootDir": "./patterns/"
     },
     "dependencies": {
       "@aztec/aztec.js": "0.20.0",
