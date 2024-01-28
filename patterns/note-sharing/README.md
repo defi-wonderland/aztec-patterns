@@ -1,4 +1,5 @@
-Note sharing involves emitting the same note with a shared nullifier key to multiple participants. This may seem counterintuitive, given that by doing this we are essentially sharing private information, however, this is not something undesirable in certain situations as it can allow us to coordinate different parties that may not know each other.
+# Note Sharing Pattern
+We call note sharing to the act of emitting the same note with a shared nullifier key to multiple participants. This may seem counterintuitive, given that by doing this we are essentially sharing private information, however, this is not something undesirable in certain situations as it can allow us to coordinate different parties that may not know each other.
 
 To make the benefit more clear, let's imagine we have Alice and Bob. They don't know each other, but Alice communicates her desire to know the price of tulips in the Netherlands over the internet. Bob sees her message and tells her that he can provide that information, in exchange for a fee. Alice agrees, but wants the option to cancel her request because a friend's of her may be able to provide the information for free.
 
@@ -42,7 +43,7 @@ pub fn compute_nullifier_without_context(self) -> Field {
 }
 ```
 
-When we `insert` a note in storage, the second argument is a boolean that tells the contract whether to call broadcast or not. In our case, we will want to set this to `true` so that the note gets emitted to Alice. Once that's done, we will also want to emit the note to Bob, and for this one, we have to manually emit the encrypted log. It would look like this:
+When we `insert` a note in storage, the second argument is a boolean that tells the contract whether to invoke `broadcast()` or not. In our case, we will want to set this to `true` so that the note gets emitted to Alice. Once that's done, we will also want to emit the note to Bob, and for this one, we have to manually emit the encrypted log. It would look like this:
 
 ```rust
 fn create_request(question: Field, bob_address: AztecAddress) {

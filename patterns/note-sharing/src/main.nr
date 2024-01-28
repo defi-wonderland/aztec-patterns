@@ -36,14 +36,13 @@ contract SharedNote {
     Refer to the README.md for a description of the note sharing pattern as well as links to real code where the pattern is implemented.
 
     The main thing to take away from this pattern is that it allows for coordination between parties that don't know each other. 
-    Some simple examples of what this pattern can accomplish:
+    Some examples of what this pattern can accomplish:
 
-    1) In the most simple case, sharing a note with a shared nullifier key allows any of the parties to nullify the note. Which is a way to trust another party to call a function that performs some action and nullifies the note.
-       It can be thought as, perhaps, an authorization of sorts. 
-       A simple example would be a game where Alice and Bob play against each other. Alice can share a note with Bob indicating the start of the game, and any of the two can nullify it at any time to stop it.
+    1) Sharing a note with a shared nullifier key allows any of the parties to nullify the note. Which is a way to trust another party to call a function that performs some action and nullifies the note. 
+       An example would be a game where Alice and Bob play against each other. Alice can share a note with Bob indicating the start of the game, and any of the two can nullify it at any time to stop it.
 
-    2) If Alice needs something, and Bob can provide it, she can share a note with Bob, constituting an agreement of sorts. Because the note is shared, Alice can cancel the note if Bob doesn't provide what she needs 
-       or if she changes her mind before Bob provided it. Bob, in turn, can forbid Alice from cancelling the note if he has already provided what she needed.
+    2) If Alice needs something, and Bob can provide it, she can share a note with Bob, constituting an agreement. Because the note is shared, Alice can cancel the note if Bob doesn't provide what she needs 
+       or if she changes her mind before Bob provides it. Bob, in turn, can forbid Alice from cancelling the note if he has already provided what she needed.
 */
 
     // Declaring the slots for the notes
