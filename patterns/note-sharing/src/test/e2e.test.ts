@@ -1,31 +1,14 @@
 import {
     AccountWalletWithPrivateKey,
-    AztecAddress,
-    CheatCodes,
-    computeAuthWitMessageHash,
-    computeMessageSecretHash,
-    ContractFunctionInteraction,
     createPXEClient,
     ExtendedNote,
     Fr,
-    Note,
     PXE,
-    TxHash,
-    TxStatus,
-    Fq,
     waitForPXE,
-    CompleteAddress,
-    TxReceipt,
-    FieldsOf
   } from "@aztec/aztec.js";
   
-//   import { BetNote } from "./Notes.js";
   import { SharedNoteContract } from "../../../../artifacts/note-sharing/SharedNote.js";
-  import { SharedNote } from "../notes/Notes.js";
   import { createAccount, getInitialTestAccountsWallets } from "@aztec/accounts/testing";
-  
-  // Constants
-  const SHARED_NOTE_SLOT: Fr = new Fr(1);
   
   // Global variables
   let pxe: PXE;
