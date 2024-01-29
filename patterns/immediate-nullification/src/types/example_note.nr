@@ -34,22 +34,22 @@ impl ExampleNote {
     /// @param  owner: the user who owns the note
     /// @param  randomness: a random, user-provided Field, will be used for nullification of the note.
     pub fn new(
-            _context: &mut PrivateContext,
-            _owner: AztecAddress,
-            _randomness: Field,
+            context: &mut PrivateContext,
+            owner: AztecAddress,
+            randomness: Field,
         ) -> Self {
         // Store the function to generate the nullifier in a variable
         let compute_initialization_nullifier = ExampleNote::generate_round_randomness_nullifier;
 
 		// Call the function to generate the nullifier
-        let nullifier = compute_initialization_nullifier(_owner, _randomness);
+        let nullifier = compute_initialization_nullifier(owner, randomness);
 
 		// Push the nullifier to the nullifier tree
-        _context.push_new_nullifier(nullifier, 0);
+        context.push_new_nullifier(nullifier, 0);
 
         ExampleNote {
-            owner: _owner,
-            randomness: _randomness,
+            owner,
+            randomness,
             header: NoteHeader::empty(),
         }
     }

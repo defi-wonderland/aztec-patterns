@@ -88,10 +88,10 @@ export class ExampleNoteContract extends ContractBase {
     /** are_parameters_nullified(owner: struct, randomness: field) */
     are_parameters_nullified: ((owner: AztecAddressLike, randomness: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
-    /** consume_note(randomness: field) */
-    consume_note: ((randomness: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
     /** compute_note_hash_and_nullifier(contract_address: struct, nonce: field, storage_slot: field, preimage: array) */
     compute_note_hash_and_nullifier: ((contract_address: AztecAddressLike, nonce: FieldLike, storage_slot: FieldLike, preimage: FieldLike[]) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** consume_note(randomness: field) */
+    consume_note: ((randomness: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }

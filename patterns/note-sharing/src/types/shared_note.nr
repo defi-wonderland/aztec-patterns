@@ -35,15 +35,15 @@ impl SharedNote {
     /// @param  bob: the user who the note is shared with
     /// @param  shared_nullifier_key: the key used to nullify the note
     pub fn new(
-            _alice: AztecAddress,
-            _bob: AztecAddress,
-            _shared_nullifier_key: Field,
+            alice: AztecAddress,
+            bob: AztecAddress,
+            shared_nullifier_key: Field,
         ) -> Self {
 
         SharedNote {
-            alice: _alice,
-            bob: _bob,
-            shared_nullifier_key: _shared_nullifier_key,
+            alice,
+            bob,
+            shared_nullifier_key,
             header: NoteHeader::empty(),
         }
 
