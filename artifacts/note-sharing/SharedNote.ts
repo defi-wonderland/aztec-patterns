@@ -82,11 +82,11 @@ export class SharedNoteContract extends ContractBase {
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public methods!: {
     
-    /** alice_action(bob: struct) */
-    alice_action: ((bob: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
     /** create_and_share_note(bob: struct) */
     create_and_share_note: ((bob: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** alice_action(bob: struct) */
+    alice_action: ((bob: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
     /** bob_action(alice: struct) */
     bob_action: ((alice: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;

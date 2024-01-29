@@ -7,12 +7,12 @@ import {
     waitForPXE,
   } from "@aztec/aztec.js";
   
-  import { ExampleNoteContract } from "../../../../artifacts/immediate-nullification/ExampleNote.js";
+  import { ImmediateNoteNullificationContract } from "../../../../artifacts/immediate-nullification/ImmediateNoteNullification.js";
   import { getInitialTestAccountsWallets } from "@aztec/accounts/testing";
   
   // Global variables
   let pxe: PXE;
-  let exampleNote: ExampleNoteContract;
+  let immediateNullificationContract: ImmediateNoteNullificationContract;
   
   let user: AccountWalletWithPrivateKey;
   let deployer: AccountWalletWithPrivateKey;
@@ -36,11 +36,11 @@ import {
   describe("E2E Example Note", () => {
     let randomness: Fr;
     beforeAll(async () => {
-      const exampleNoteReceipt = await ExampleNoteContract.deploy(deployer)
+      const deploymentReceipt = await ImmediateNoteNullificationContract.deploy(deployer)
         .send()
         .wait();
   
-      exampleNote = exampleNoteReceipt.contract;
+      immediateNullificationContract = deploymentReceipt.contract;
     }, 200_000);
 
     describe("create_note(...)", () => {
@@ -48,7 +48,7 @@ import {
 
         it("should mine the transaction", async () => {
             randomness = Fr.random();
-            const txReceipt = await exampleNote
+            const txReceipt = await immediateNullificationContract
             .withWallet(user)
             .methods.create_note(randomness)
             .send()
@@ -77,7 +77,7 @@ import {
         })
         
         it("should nullify the randomness and owner parameter combination", async () => {
-            const result = await exampleNote
+            const result = await immediateNullificationContract
             .withWallet(user)
             .methods.are_parameters_nullified(
                 user.getAddress(),
@@ -90,7 +90,7 @@ import {
         it("should drop the transaction if the user tries to create a note with the same parameters", async () => {
             // Transaction gets dropped
             await expect(
-                exampleNote
+                immediateNullificationContract
                     .withWallet(user)
                     .methods.create_note(randomness)
                     .send()
@@ -104,7 +104,7 @@ import {
 
         it("should revert if the note doesnt exist", async () => {
             let newRandomness = Fr.random();
-            const txReceipt = exampleNote
+            const txReceipt = immediateNullificationContract
             .withWallet(user)
             .methods.consume_note(newRandomness)
             .simulate();
@@ -115,7 +115,7 @@ import {
         })
 
         it("should mine the transaction", async () => {
-            const txReceipt = await exampleNote
+            const txReceipt = await immediateNullificationContract
             .withWallet(user)
             .methods.consume_note(
                 randomness,
