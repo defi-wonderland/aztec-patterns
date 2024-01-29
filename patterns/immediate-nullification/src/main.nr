@@ -1,6 +1,6 @@
 mod types;
  
-contract ExampleNote { 
+contract ImmediateNoteNullification { 
     use crate::types::example_note:: {ExampleNote, ExampleNoteMethods, EXAMPLE_NOTE_LEN};
 
     use dep::std::option::Option;
