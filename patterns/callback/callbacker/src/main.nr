@@ -1,9 +1,12 @@
 mod types;
+mod interfaces;
 
 // @dev This is the entry point.
 contract Callback {
 
     use crate::types::pending_callback_note::{PendingCallbackNote, PendingCallbackNoteMethods, PENDING_CALLBACK_NOTE_LEN};
+
+    use crate::interfaces::callback::CallbackInterface;
     
     use dep::std::option::Option;
 
@@ -47,7 +50,6 @@ contract Callback {
     // Declaring storage
     struct Storage {
         pending_callback_notes: Set<PendingCallbackNote, PENDING_CALLBACK_NOTE_LEN>,
-        callback_result_notes: Set<ValueNote, VALUE_NOTE_LEN>,
     }
 
     // Declaring storage implementation
@@ -55,7 +57,6 @@ contract Callback {
         fn init(context: Context) -> Self {
             Storage {   
                 pending_callback_notes: Set::new(context, PENDING_CALLBACK_NOTE_LEN, PendingCallbackNoteMethods),
-                callback_result_notes: Set::new(context, VALUE_NOTE_LEN, ValueNoteMethods),
             }
         }
     }
@@ -64,16 +65,21 @@ contract Callback {
     #[aztec(private)]
     fn constructor() {}
 
-    /// @notice queue a new callback, triggerable by the given allowed address. Here, the resolver address is the address of this same contract.
-    #[aztec(private)]
-    fn new_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
-
-
-    }
-
+    /// @notice Triggers the callback
     #[aztec(private)]
     fn resolve() {
+        let caller = context.msg_sender();
 
+        let next_callback_filter = NoteGetterOptions::new()
+            .select(0, caller.to_field())
+            .set_limit(1);
+
+        let next_callback = storage.pending_callback_notes.get_notes(next_callback_filter)[0];
+
+        if(next_callback.is_some()){
+            let _ = CallbackInterface::at(next_callback.unwrap_unchecked().origin.to_field()).callback(&mut context, next_callback.unwrap_unchecked().sender, 6969);
+        }
+            
     }
     
     ///@notice Computes note hash and nullifier.

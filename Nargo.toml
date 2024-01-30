@@ -1,2 +1,2 @@
 [workspace]
-members = ["patterns/note-sharing", "patterns/callback"]
+members = ["patterns/note-sharing", "patterns/callback/call_me_back","patterns/callback/callbacker"]
