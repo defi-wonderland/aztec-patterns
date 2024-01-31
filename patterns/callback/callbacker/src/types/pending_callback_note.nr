@@ -18,7 +18,7 @@ use dep::aztec::{
 struct PendingCallbackNote {
     owner: AztecAddress,
     sender: AztecAddress,
-    origin: AztecAddress,
+    beneficiary: AztecAddress,
     data: Field,
     header: NoteHeader
 }
@@ -33,14 +33,14 @@ impl PendingCallbackNote {
     pub fn new(
             owner: AztecAddress,
             sender: AztecAddress,
-            origin: AztecAddress,
+            beneficiary: AztecAddress,
             data: Field,
         ) -> Self {
 
         PendingCallbackNote {
             owner,
             sender,
-            origin,
+            beneficiary,
             data,
             header: NoteHeader::empty(),
         }
@@ -52,7 +52,7 @@ impl PendingCallbackNote {
         [
             self.owner.to_field(),
             self.sender.to_field(),
-            self.origin.to_field(),
+            self.beneficiary.to_field(),
             self.data,
         ]
     }
@@ -62,7 +62,7 @@ impl PendingCallbackNote {
         PendingCallbackNote {
             owner: AztecAddress::from_field(preimage[0]),
             sender: AztecAddress::from_field(preimage[1]),
-            origin: AztecAddress::from_field(preimage[2]),
+            beneficiary: AztecAddress::from_field(preimage[2]),
             data: preimage[3],
             header: NoteHeader::empty(),
         }

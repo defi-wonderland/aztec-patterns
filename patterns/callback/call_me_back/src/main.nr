@@ -28,14 +28,19 @@ contract Callback {
 /*
     Callback pattern
     =====================
-    This is an example of a callback function in Aztec. 
+    This is an example of a callback pattern in Aztec.
 
-    alice calls queue call with bob address as resolver, bob calls resolve on the resolver contract, which calls the callback function on this contract.
+    There are 2 contracts and 2 parties involved:
+    - call_me_back contract: initiate the flow and receiving the callback
+    - callbacker contract: store the pending callback and, when resolve() is called, process it
+    - Alice: calls the call_me_back contract
+    - Bob: trigger the logic on the callbacker contract
+
+    alice calls queue_new_call with bob address as the one who needs to resolve it, bob calls resolve on the resolver contract, which calls the callback function.
 
     this can be fully public - alive private then bob answer isn't private and the callback fn leaks it - fully private and callback effect if accessible for alice only
     
-    This example uses a callback to set a value note for the original sender, within the same contract (package being limited to a single contract) while using an external
-    interface to showcase an use which is identical as using 2 independents contracts.
+    This example uses a callback to set a value note for the original sender.
 */
 
     // Declaring the slots for the notes
@@ -59,17 +64,17 @@ contract Callback {
     #[aztec(private)]
     fn constructor() {}
 
-    /// @notice queue a new callback, triggerable by the given allowed address. Here, the resolver address is the address of this same contract.
+    /// @notice queue a new callback, triggerable by the given allowed address.
     #[aztec(private)]
     fn new_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
-
-        
+        // let _ = CallbackerInterface.at(resolver).
 
     }
 
     #[aztec(private)]
     fn callback(original_caller: AztecAddress, value: Field) {
         let mut new_value = ValueNote::new(value, original_caller);
+        storage.callback_result_notes.insert(&mut new_value, true);
     }
     
     ///@notice Computes note hash and nullifier.
