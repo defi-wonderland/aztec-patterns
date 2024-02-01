@@ -1,2 +1,7 @@
 [workspace]
-members = ["patterns/note-sharing", "patterns/immediate-nullification"]
+members = [
+"patterns/note-sharing", 
+"patterns/immediate-nullification", 
+"patterns/contracts-as-note-owners/escrow", 
+"patterns/contracts-as-note-owners/trustless-manager",
+]

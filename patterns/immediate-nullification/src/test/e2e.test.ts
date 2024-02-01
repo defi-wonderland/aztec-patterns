@@ -46,7 +46,7 @@ import {
     describe("create_note(...)", () => {
         let exampleNotes: ExtendedNote[];
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             randomness = Fr.random();
             const txReceipt = await immediateNullificationContract
             .withWallet(user)
@@ -114,7 +114,7 @@ import {
             );
         })
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const txReceipt = await immediateNullificationContract
             .withWallet(user)
             .methods.consume_note(
