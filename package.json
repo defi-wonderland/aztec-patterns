@@ -6,7 +6,11 @@
     "scripts": {
       "compile": "aztec-nargo compile --workspace",
       "codegen:note-sharing": "aztec-cli codegen target/note_sharing_pattern-SharedNote.json -o artifacts/note-sharing --ts",
-      "codegen:all": "yarn codegen:note-sharing",
+      "codegen:immediate-nullification": "aztec-cli codegen target/immediate_note_nullification-ImmediateNoteNullification.json -o artifacts/immediate-nullification --ts",
+      "codegen:token": "aztec-cli codegen artifacts/standard-token/Token.json -o artifacts/standard-token --ts",
+      "codegen:escrow": "aztec-cli codegen target/escrow_contract-Escrow.json -o artifacts/contracts-as-note-owners/escrow --ts",
+      "codegen:trustless-manager": "aztec-cli codegen target/trustless_manager-TrustlessManager.json -o artifacts/contracts-as-note-owners/trustless-manager --ts",
+      "codegen:all": "yarn codegen:note-sharing && yarn codegen:immediate-nullification && yarn codegen:token && yarn codegen:escrow && yarn codegen:trustless-manager",
       "build:contracts": "yarn compile && yarn codegen:all",
       "test": "yarn build:contracts && NODE_NO_WARNINGS=1 node --experimental-vm-modules $(yarn bin jest) --runInBand --passWithNoTests --testTimeout=30000"
     },

@@ -50,7 +50,7 @@ import {
         let shared_key_nullifier_bob: Fr;
         let sharedNotes: ExtendedNote[]; 
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const txReceipt = await sharedNote
             .withWallet(alice)
             .methods.create_and_share_note(
@@ -129,7 +129,7 @@ import {
             );
         })
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const txReceipt = await sharedNote
             .withWallet(bob)
             .methods.bob_action(
@@ -182,7 +182,7 @@ import {
             );
         })
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const txReceipt = await sharedNote
             .withWallet(bob)
             .methods.bob_action(
