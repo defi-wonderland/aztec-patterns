@@ -27,14 +27,14 @@ struct ExampleNote {
 
 impl ExampleNote {
     pub fn new(
-	    _id: Field, 
-	    _other_member: Field, 
-	    _other_member_2: AztecAddress
+	    id: Field, 
+	    other_member: Field, 
+	    other_member_2: AztecAddress
     ) -> Self {
         ExampleNote {
-            id: _id,
-            other_member: _other_member,
-            other_member_2: _other_member_2,
+            id,
+            other_member,
+            other_member_2,
             header: NoteHeader::empty(),
         }
     }
@@ -59,35 +59,36 @@ struct ExampleNote {
 impl ExampleNote {
     /// @notice Creates a new note.
     /// @param  _context: the context. It's necessary to push the nullifier to the tree.
+    /// @param  id the unique identifier of the note
     /// @param  other_member: placeholder to illustrate a note with more members
     /// @param  other_member_2: placeholder to illustrate a note with more members
     pub fn new(
         _context: &mut PrivateContext,
-	    _id: Field, 
-	    _other_member: Field, 
-	    _other_member_2: AztecAddress
+	    id: Field, 
+	    other_member: Field, 
+	    other_member_2: AztecAddress
     ) -> Self {
 	    // Store the function to generate the nullifier in a variable
-        let compute_initialization_nullifier = ExampleNote::generate_round_randomness_nullifier;
+        let compute_initialization_nullifier = ExampleNote::generate_id_nullifier;
 
 		// Call the function to generate the nullifier
-        let nullifier = compute_initialization_nullifier(_id);
+        let nullifier = compute_initialization_nullifier(id);
 
 		// Push the nullifier to the nullifier tree
         _context.push_new_nullifier(nullifier, 0);
 
 		// Create the note
         ExampleNote {
-            id: _id,
-            other_member: _other_member,
-            other_member_2: _other_member_2,
+            id,
+            other_member,
+            other_member_2,
             header: NoteHeader::empty(),
         }
     }
 
 	/// @notice Nullifying hash generator
     /// @param _id_ The id to nullify
-    pub fn generate_round_randomness_nullifier(_id: Field) -> Field {
+    pub fn generate_id_nullifier(_id: Field) -> Field {
 	    // hash the id
         dep::std::hash::pedersen_hash([id])
     }
@@ -103,7 +104,7 @@ A last note is that this may be hard to test. To facilitate this, an unconstrain
     /// @notice ExampleNote id initialization checker. Checks whether the id was added to the nullifying tree
     /// @param _id The id to check for nullification status
     unconstrained pub fn is_id_nullified(_id: Field) -> bool {
-        let compute_initialization_nullifier = ExampleNote::generate_round_randomness_nullifier;
+        let compute_initialization_nullifier = ExampleNote::generate_id_nullifier;
         let nullifier = compute_initialization_nullifier(_id);
         check_nullifier_exists(nullifier)
     }

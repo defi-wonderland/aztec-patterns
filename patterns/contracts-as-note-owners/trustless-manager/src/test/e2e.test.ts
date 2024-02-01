@@ -89,7 +89,7 @@ import {
             await expect(txReceipt).rejects.toThrow();
         })
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const nonce = await createAuthEscrowMessage(
                 token,
                 alice,
@@ -246,7 +246,7 @@ import {
             );
         })
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const txReceipt = await trustlessManager
             .withWallet(bob)
             .methods.settle(

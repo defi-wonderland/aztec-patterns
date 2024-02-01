@@ -45,7 +45,6 @@ impl EscrowNote {
     /// @param owner the owner of the note
     /// @param random_id the id of the note
     /// @param payment_token the token escrowed
-    /// @param header the note header
     pub fn new(amount: SafeU120, owner: AztecAddress, random_id: Field, payment_token: AztecAddress) -> Self {
         Self {
             amount,
@@ -79,7 +78,8 @@ impl EscrowNote {
         pedersen_hash(self.serialize(),0)
     }
 
-    /// @notice computes the note's nullifier using it's random_id
+    /// @notice computes the note's nullifier using its random_id
+    /// @param context the private context
     fn compute_nullifier(self, context: &mut PrivateContext) -> Field {
         self.compute_nullifier_without_context()
     }
@@ -96,12 +96,15 @@ impl EscrowNote {
     }
 
     /// @notice sets the note header
+    /// @param header the note header
     pub fn set_header(&mut self, header: NoteHeader) {
         self.header = header;
     }
 
     /// @notice broadcasts the note to the owner as long as the owner is not a contract.
     /// @dev    it's not emitted to contract owners as they don't have encryption keys.
+    /// @param context the private context
+    /// @param slot the slot where the note is stored in the contract
     pub fn broadcast(self, context: &mut PrivateContext, slot: Field) {
         if !self.amount.is_zero() {
             let encryption_pub_key = get_public_key(self.owner);

@@ -81,7 +81,7 @@ import {
             await expect(txReceipt).rejects.toThrow();
         })
 
-        it("should mine the transaction", async () => {
+        it("should not revert", async () => {
             const nonce = await createAuthEscrowMessage(
                 token,
                 alice,
@@ -174,7 +174,7 @@ import {
             );
         })
 
-        it("should mine the transaction", async () => {
+        it("should notrevert", async () => {
             const zeroNonce = 0n;
             const txReceipt = await escrow
             .withWallet(alice)

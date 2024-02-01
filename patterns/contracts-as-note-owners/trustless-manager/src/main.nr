@@ -118,7 +118,7 @@ contract TrustlessManager {
     }
 
     /// @notice Consumes an ReceiptNote.
-    /// @param randomness The randomness used when creating the note.
+    /// @param random_id The random_id used when creating the note.
     #[aztec(private)]
     fn settle(random_id: Field) {
         // Set the sender for readability.

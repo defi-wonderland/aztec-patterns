@@ -22,8 +22,9 @@ use dep::aztec::{
 /////////////////////////////////////////////////////////////////////
 
 /// @notice A note that represents the receipt for an escrowed token
-/// @member from the user that escrows the tokens
 /// @member owner the owner of the note
+/// @member from the user that escrows the tokens
+/// @member to the user that will receive the escrowed tokens
 /// @member random_id the id given by the escrow contract after escrowing the tokens
 /// @member shared_nullifier the nullifier shared between the from and to
 /// @member payment_token the token escrowed
@@ -47,8 +48,9 @@ global RECEIPT_NOTE_LEN: Field = 8;
 impl ReceiptNote {
 
     /// @notice creates a new ReceiptNote
-    /// @param from the user that escrows the tokens
     /// @param owner the owner of the note
+    /// @param from the user that escrows the tokens
+    /// @param to the user that will receive the escrowed tokens
     /// @param random_id the id given by the escrow contract after escrowing the tokens
     /// @param shared_nullifier the nullifier shared between the from and to
     /// @param payment_token the token escrowed
@@ -97,6 +99,7 @@ impl ReceiptNote {
     }
 
     /// @notice computes the nullifier using the shared nullifier
+    /// @param context the private context
     fn compute_nullifier(self, _context: &mut PrivateContext) -> Field {
         self.compute_nullifier_without_context()
     }
@@ -113,11 +116,14 @@ impl ReceiptNote {
     }
 
     /// @notice gets the note header
+    /// @param header the note header
     fn set_header(&mut self, header: NoteHeader) {
         self.header = header;
     }
 
     /// @notice emits the note to the user that escrowed the tokens
+    /// @param context the private context
+    /// @param slot the slot where the note is stored in the contract
     fn broadcast(self, context: &mut PrivateContext, slot: Field) {
         let encryption_pub_key = get_public_key(self.from);
 

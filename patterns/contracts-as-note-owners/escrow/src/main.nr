@@ -80,6 +80,7 @@ contract Escrow {
     /// @notice Escrows an amount of tokens.
     /// @param from The address whose tokens will be escrowed.
     /// @param owner The address that will own the escrow note.
+    /// @param amount The amount of tokens to escrow.
     /// @param payment_token The address of the token to escrow.
     /// @param nonce A nonce for the authwit check.
     /// @param recipients Addresses that the caller can conditionally emit the escrow note to.
@@ -91,10 +92,8 @@ contract Escrow {
         // Instantiate the payment token contract
         let token = Token::at(payment_token);
 
-        // Transfer the tokens to this contract. This requires a previous authwit from Alice to this contract. We won't focus on privacy here, to keep things simple.
+        // Transfer the tokens to this contract. This requires a previous authwit from Alice to this contract. We won't focus on keeping the tokens transferred private, to keep things simple.
         token.unshield(&mut context, from.to_field(), address_this.to_field(), amount, nonce);
-        // let selector = FunctionSelector::from_signature("transfer_public((Field),(Field),Field,Field)");
-        // context.call_public_function(payment_token, selector, [from.to_field(), address_this.to_field(), amount, nonce]);
 
         // Create random_id for the note
         let random_id = rand();
