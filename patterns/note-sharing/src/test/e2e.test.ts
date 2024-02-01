@@ -174,7 +174,7 @@ import {
         it("should revert if the note doesnt exist", async () => {
             const txReceipt = sharedNote
             .withWallet(alice)
-            .methods.bob_action(randomAccount.getAddress())
+            .methods.alice_action(randomAccount.getAddress())
             .simulate();
 
             await expect(txReceipt).rejects.toThrow(
@@ -184,9 +184,9 @@ import {
 
         it("should not revert", async () => {
             const txReceipt = await sharedNote
-            .withWallet(bob)
-            .methods.bob_action(
-                alice.getAddress(),
+            .withWallet(alice)
+            .methods.alice_action(
+                bob.getAddress(),
             )
             .send()
             .wait({debug: true});
