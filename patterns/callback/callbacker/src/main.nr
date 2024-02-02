@@ -9,14 +9,25 @@ contract Callbacker {
         context::Context,
         note::note_getter_options::NoteGetterOptions,
         protocol_types::address::AztecAddress,
-        state_vars::set::Set
+        state_vars::set::Set,
+        log::emit_encrypted_log,
+        oracle::{
+            nullifier_key::get_nullifier_secret_key,
+            get_public_key::get_public_key,
+        },
+    };
+
+    use dep::aztec::note::{
+        note_header::NoteHeader,
+        note_interface::NoteInterface,
+        note_viewer_options::NoteViewerOptions,
+        utils as note_utils,
+
     };
 
     use dep::std::option::Option;
-
-    use dep::value_note::value_note::{ValueNote, ValueNoteMethods, VALUE_NOTE_LEN};
     
-    global CALLBACK_RESULT_NOTE_SLOT = 1;
+    global PENDING_CALLBACK_NOTE_SLOT = 1;
 
     struct Storage {
         pending_callback_notes: Set<PendingCallbackNote, PENDING_CALLBACK_NOTE_LEN>,
@@ -25,7 +36,7 @@ contract Callbacker {
     impl Storage {
         fn init(context: Context) -> Self {
             Storage {   
-                pending_callback_notes: Set::new(context, PENDING_CALLBACK_NOTE_LEN, PendingCallbackNoteMethods),
+                pending_callback_notes: Set::new(context, PENDING_CALLBACK_NOTE_SLOT, PendingCallbackNoteMethods),
             }
         }
     }
@@ -36,7 +47,19 @@ contract Callbacker {
     #[aztec(private)]
     fn queue_new_call(allowed_address: AztecAddress, beneficiary: AztecAddress, value: Field) {
         let mut new_pending_callback = PendingCallbackNote::new(allowed_address, context.msg_sender(), beneficiary, value);
-        storage.pending_callback_notes.insert(&mut new_pending_callback, true);
+        storage.pending_callback_notes.insert(&mut new_pending_callback, false); // No broadcast for Alice needed, this is for Bob
+
+        // Broadcast to Bob:
+        let encryption_pub_key = get_public_key(allowed_address);
+
+        emit_encrypted_log(
+            &mut context, // context
+            context.this_address(), // the address of the contract calling this function
+            PENDING_CALLBACK_NOTE_SLOT, // the slot the note is stored in
+            encryption_pub_key, // the encryption key of the owner
+            new_pending_callback.serialize(), // the contents of the note, serialized
+        );
+
     }
 
     #[aztec(private)]
@@ -72,9 +95,10 @@ contract Callbacker {
             6969
         );
     }
-
     
-    unconstrained fn compute_note_hash_and_nullifier(contract_address: AztecAddress, nonce: Field, storage_slot: Field, preimage: [Field; VALUE_NOTE_LEN]) -> pub [Field; 4] {
-        [0,0,0,0]
+    unconstrained fn compute_note_hash_and_nullifier(contract_address: AztecAddress, nonce: Field, storage_slot: Field, preimage: [Field; PENDING_CALLBACK_NOTE_LEN]) -> pub [Field; 4] {
+        let note_header = NoteHeader::new(contract_address, nonce, storage_slot);
+
+        note_utils::compute_note_hash_and_nullifier(PendingCallbackNoteMethods, note_header, preimage)
     }
 }

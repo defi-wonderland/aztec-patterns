@@ -42,7 +42,13 @@ contract CallMeBack {
     use dep::aztec::protocol_types::{
         address::AztecAddress,
     };
-    
+
+
+
+
+    use dep::aztec::oracle::debug_log::{ debug_log };
+
+
     // Declaring the slots for the notes
     global CALLBACK_RESULT_NOTE_SLOT = 1;
 
@@ -87,19 +93,24 @@ contract CallMeBack {
         let sender = context.msg_sender();
         let _ = CallbackerPrivateContextInterface::at(resolver).call_me_now(
             &mut context,
-            BeneficiaryCallMeNowStruct { inner: context.msg_sender().to_field() },
+            BeneficiaryCallMeNowStruct { inner: sender.to_field() },
             data
         );
     }
 
     #[aztec(private)]
-    fn callback(original_caller: AztecAddress, value: Field) {
+    fn callback(original_caller: AztecAddress, value: Field) {  
+    debug_log("000000000000000000000000000  CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK  000000000000000000000000");
+
+
         let mut new_value = ValueNote::new(value, original_caller);
         storage.callback_result_notes.insert(&mut new_value, true);
     }
     
     ///@notice Computes note hash and nullifier.
     unconstrained fn compute_note_hash_and_nullifier(contract_address: AztecAddress, nonce: Field, storage_slot: Field, preimage: [Field; VALUE_NOTE_LEN]) -> pub [Field; 4] {
-        [0,0,0,0]
+        let note_header = NoteHeader::new(contract_address, nonce, storage_slot);
+
+        note_utils::compute_note_hash_and_nullifier(ValueNoteMethods, note_header, preimage)
     }
 }

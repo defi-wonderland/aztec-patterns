@@ -6,9 +6,9 @@
     "scripts": {
       "compile": "aztec-nargo compile --workspace",
       "codegen:note-sharing": "aztec-cli codegen target/note_sharing_pattern-SharedNote.json -o artifacts/note-sharing --ts",
-      "codegen:callback1": "aztec-cli codegen target/callback_pattern-Callback.json -o artifacts/callback --ts",
-      "codegen:callback2": "aztec-cli codegen target/callback_pattern-CallMeBack.json -o artifacts/callMeBack --ts",
-      "codegen:all": "yarn codegen:note-sharing",
+      "codegen:callback1": "aztec-cli codegen target/callbacker-Callbacker.json -o artifacts/callback --ts",
+      "codegen:callback2": "aztec-cli codegen target/call_me_back-CallMeBack.json -o artifacts/callback --ts",
+      "codegen:all": "yarn codegen:note-sharing && yarn codegen:callback1 && yarn codegen:callback2",
       "build:contracts": "yarn compile && yarn codegen:all",
       "test": "yarn build:contracts && NODE_NO_WARNINGS=1 node --experimental-vm-modules $(yarn bin jest) --runInBand --passWithNoTests --testTimeout=30000"
     },

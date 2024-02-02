@@ -5,13 +5,15 @@ use dep::aztec::{
         utils::compute_note_hash_for_read_or_nullify,
     },
     oracle::{
+        nullifier_key::get_nullifier_secret_key,
         get_public_key::get_public_key,
     },
     log::emit_encrypted_log,
     context::PrivateContext,
     protocol_types::{
         address::AztecAddress
-    }
+    },
+    hash::pedersen_hash
 };
 
 /// @member 
@@ -73,13 +75,12 @@ impl PendingCallbackNote {
         dep::std::hash::pedersen_hash(serialize(self))
     }
     
-    /// @notice Computes the nullifier of the note
     pub fn compute_nullifier(self, _context: &mut PrivateContext) -> Field {
-        0
+        self.compute_nullifier_without_context()
     }
 
-    /// @notice Immutable here, for the example
     pub fn compute_nullifier_without_context(self) -> Field {
+        let _ = self; // Avoid compiler warning (same # acir opcodes and backend size)
         0
     }
 
