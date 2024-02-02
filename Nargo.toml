@@ -1,5 +1,6 @@
 [workspace]
 members = [
+"patterns/shared-nullifier-key",
 "patterns/note-sharing", 
 "patterns/immediate-nullification", 
 "patterns/contracts-as-note-owners/escrow", 

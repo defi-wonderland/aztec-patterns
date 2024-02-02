@@ -6,6 +6,7 @@ use dep::aztec::{
     },
     oracle::{
         get_public_key::get_public_key,
+        notes::check_nullifier_exists,
     },
     log::emit_encrypted_log,
     context::PrivateContext,
@@ -14,53 +15,47 @@ use dep::aztec::{
     }
 };
 
-/// @member alice: the user who shares the note
-/// @member bob: the user who the note is shared with
-/// @member shared_nullifier_key: the key used to nullify the note
+/// @member owner: the user who owns the note
+/// @member shared_nullifier: a random Field used for nullification of the note.
 /// @member header: the note header
 struct SharedNote {
-    alice: AztecAddress,
-    bob: AztecAddress,
-    shared_nullifier_key: Field,
+    owner: AztecAddress,
+    shared_nullifier: Field,
     header: NoteHeader
 }
 
 /// @notice Declare the length of the note.
-global SHARED_NOTE_LEN: Field = 3;
+global SHARED_NOTE_LEN: Field = 2;
 
 /// @notice Declare the methods of the note.
 impl SharedNote {
     /// @notice Creates a new note.
-    /// @param  alice: the user who shares the note
-    /// @param  bob: the user who the note is shared with
-    /// @param  shared_nullifier_key: the key used to nullify the note
+    /// @param  _context: the context. It's necessary to push the nullifier to the tree.
+    /// @param  owner the user who owns the note
+    /// @param  shared_nullifier a random Field used for nullification of the note.
     pub fn new(
-            alice: AztecAddress,
-            bob: AztecAddress,
-            shared_nullifier_key: Field,
+            context: &mut PrivateContext,
+            owner: AztecAddress,
+            shared_nullifier: Field,
         ) -> Self {
-
         SharedNote {
-            alice,
-            bob,
-            shared_nullifier_key,
+            owner,
+            shared_nullifier,
             header: NoteHeader::empty(),
         }
-
     }
 
     /// @notice Serializes a note into a preimage.
     pub fn serialize(self) -> [Field; SHARED_NOTE_LEN] {
-        [self.alice.to_field(), self.bob.to_field(), self.shared_nullifier_key]
+        [self.owner.to_field(), self.shared_nullifier]
     }
 
     /// @notice Deserializes a note from a preimage.
-    /// @param  preimage: the preimage to deserialize
+    /// @param preimage the preimage of the note
     pub fn deserialize(preimage: [Field; SHARED_NOTE_LEN]) -> Self {
         SharedNote {
-            alice: AztecAddress::from_field(preimage[0]),
-            bob: AztecAddress::from_field(preimage[1]),
-            shared_nullifier_key: preimage[2],
+            owner: AztecAddress::from_field(preimage[0]),
+            shared_nullifier: preimage[1],
             header: NoteHeader::empty(),
         }
     }
@@ -70,16 +65,16 @@ impl SharedNote {
         dep::std::hash::pedersen_hash(serialize(self))
     }
     
-    /// @notice Computes the nullifier of the note using the shared_nullifier_key. This allows anyone that knows this key to nullify the note.
-    /// @param  context: the context of the note
+    /// @notice Computes the nullifier of the note using the shared_nullifier.
+    /// @param context the private context
     pub fn compute_nullifier(self, _context: &mut PrivateContext) -> Field {
         self.compute_nullifier_without_context()
     }
 
-    /// @notice Computes the nullifier of the note using the shared_nullifier_key. This allows anyone that knows this key to nullify the note.
+    /// @notice Computes the nullifier of the note using the shared_nullifier.
     pub fn compute_nullifier_without_context(self) -> Field {
         let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(SharedNoteMethods, self);
-        let nullifier_key = self.shared_nullifier_key;
+        let nullifier_key = self.shared_nullifier;
 
         dep::std::hash::pedersen_hash([
             note_hash_for_nullify,
@@ -88,22 +83,22 @@ impl SharedNote {
     }
 
     /// @notice Sets the note header.
-    /// @param  header: the header to set
+    /// @param header the note header
     pub fn set_header(&mut self, header: NoteHeader) {
         self.header = header;
     }
 
-    /// @notice Broadcasts the note to alice.
-    /// @param context: the context of the note
-    /// @param slot: the slot the note is stored in
+    /// @notice: Broadcasts the note to the owner.
+    /// @param context the private context
+    /// @param slot the slot the note is stored in
     pub fn broadcast(self, context: &mut PrivateContext, slot: Field) {
-        let encryption_pub_key = get_public_key(self.alice);
+        let encryption_pub_key = get_public_key(self.owner);
 
         emit_encrypted_log(
             context, // context
             (*context).this_address(), // the address of the contract calling this function
             slot, // the slot the note is stored in
-            encryption_pub_key, // the encryption key of alice
+            encryption_pub_key, // the encryption key of the owner
             self.serialize(), // the contents of the note, serialized
         );
     }
