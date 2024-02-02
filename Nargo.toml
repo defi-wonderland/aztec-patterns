@@ -1,2 +1,10 @@
 [workspace]
-members = ["patterns/note-sharing", "patterns/callback/call_me_back","patterns/callback/callbacker"]
+members = [
+"patterns/shared-nullifier-key",
+"patterns/note-sharing", 
+"patterns/immediate-nullification", 
+"patterns/contracts-as-note-owners/escrow", 
+"patterns/contracts-as-note-owners/trustless-manager",
+"patterns/callback/call_me_back",
+"patterns/callback/callbacker"
+]

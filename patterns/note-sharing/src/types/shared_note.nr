@@ -35,15 +35,15 @@ impl SharedNote {
     /// @param  bob: the user who the note is shared with
     /// @param  shared_nullifier_key: the key used to nullify the note
     pub fn new(
-            _alice: AztecAddress,
-            _bob: AztecAddress,
-            _shared_nullifier_key: Field,
+            alice: AztecAddress,
+            bob: AztecAddress,
+            shared_nullifier_key: Field,
         ) -> Self {
 
         SharedNote {
-            alice: _alice,
-            bob: _bob,
-            shared_nullifier_key: _shared_nullifier_key,
+            alice,
+            bob,
+            shared_nullifier_key,
             header: NoteHeader::empty(),
         }
 
@@ -55,6 +55,7 @@ impl SharedNote {
     }
 
     /// @notice Deserializes a note from a preimage.
+    /// @param  preimage: the preimage to deserialize
     pub fn deserialize(preimage: [Field; SHARED_NOTE_LEN]) -> Self {
         SharedNote {
             alice: AztecAddress::from_field(preimage[0]),
@@ -70,6 +71,7 @@ impl SharedNote {
     }
     
     /// @notice Computes the nullifier of the note using the shared_nullifier_key. This allows anyone that knows this key to nullify the note.
+    /// @param  context: the context of the note
     pub fn compute_nullifier(self, _context: &mut PrivateContext) -> Field {
         self.compute_nullifier_without_context()
     }
@@ -86,11 +88,14 @@ impl SharedNote {
     }
 
     /// @notice Sets the note header.
+    /// @param  header: the header to set
     pub fn set_header(&mut self, header: NoteHeader) {
         self.header = header;
     }
 
-    // Broadcasts the note to alice.
+    /// @notice Broadcasts the note to alice.
+    /// @param context: the context of the note
+    /// @param slot: the slot the note is stored in
     pub fn broadcast(self, context: &mut PrivateContext, slot: Field) {
         let encryption_pub_key = get_public_key(self.alice);
 
@@ -98,7 +103,7 @@ impl SharedNote {
             context, // context
             (*context).this_address(), // the address of the contract calling this function
             slot, // the slot the note is stored in
-            encryption_pub_key, // the encryption key of the alice
+            encryption_pub_key, // the encryption key of alice
             self.serialize(), // the contents of the note, serialized
         );
     }
