@@ -8,15 +8,19 @@ use dep::aztec::protocol_types::{
   constants::RETURN_VALUES_LENGTH,
 };
 
+struct ResolverNewAtomicCallStruct {
+  inner: Field,
+}
+
 struct OriginalCallerCallbackStruct {
   inner: Field,
 }
 
-struct ResolverNewCallStruct {
+struct ResolverNewAsyncCallStruct {
   inner: Field,
 }
 
-struct AllowedAddressNewCallStruct {
+struct AllowedAddressNewAsyncCallStruct {
   inner: Field,
 }
 
@@ -33,6 +37,20 @@ impl CallMeBackPrivateContextInterface {
       }
   }
   
+  pub fn new_atomic_call(
+    self,
+    context: &mut PrivateContext,
+    data: Field,
+    resolver: ResolverNewAtomicCallStruct
+  ) -> [Field; RETURN_VALUES_LENGTH] {
+    let mut serialized_args = [0; 2];
+    serialized_args[0] = data;
+    serialized_args[1] = resolver.inner;
+
+    context.call_private_function(self.address, FunctionSelector::from_field(0x2111825c), serialized_args)
+  }
+  
+
   pub fn callback(
     self,
     context: &mut PrivateContext,
@@ -47,19 +65,19 @@ impl CallMeBackPrivateContextInterface {
   }
   
 
-  pub fn new_call(
+  pub fn new_async_call(
     self,
     context: &mut PrivateContext,
     data: Field,
-    resolver: ResolverNewCallStruct,
-    allowed_address: AllowedAddressNewCallStruct
+    resolver: ResolverNewAsyncCallStruct,
+    allowed_address: AllowedAddressNewAsyncCallStruct
   ) -> [Field; RETURN_VALUES_LENGTH] {
     let mut serialized_args = [0; 3];
     serialized_args[0] = data;
     serialized_args[1] = resolver.inner;
     serialized_args[2] = allowed_address.inner;
 
-    context.call_private_function(self.address, FunctionSelector::from_field(0xde38a790), serialized_args)
+    context.call_private_function(self.address, FunctionSelector::from_field(0x3ce5fb3e), serialized_args)
   }
   
 }

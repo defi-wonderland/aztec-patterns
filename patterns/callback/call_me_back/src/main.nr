@@ -43,9 +43,6 @@ contract CallMeBack {
         address::AztecAddress,
     };
 
-
-
-
     use dep::aztec::oracle::debug_log::{ debug_log };
 
 
@@ -72,7 +69,7 @@ contract CallMeBack {
     
     /// @notice queue a new callback, triggerable by the given allowed address.
     #[aztec(private)]
-    fn new_biparty_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
+    fn new_async_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
 
         /* Insert whatever logic here */
 

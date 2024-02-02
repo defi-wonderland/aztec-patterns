@@ -2,7 +2,8 @@ mod types;
 mod interfaces;
 
 contract Callbacker {
-    use crate::interfaces::CallMeBack::{CallMeBackPrivateContextInterface, OriginalCallerCallbackStruct, ResolverNewCallStruct, AllowedAddressNewCallStruct};
+
+    use crate::interfaces::CallMeBack::{CallMeBackPrivateContextInterface, OriginalCallerCallbackStruct, ResolverNewAsyncCallStruct, AllowedAddressNewAsyncCallStruct};
     use crate::types::pending_callback_note::{PendingCallbackNote, PendingCallbackNoteMethods, PENDING_CALLBACK_NOTE_LEN};
 
     use dep::aztec::{
@@ -59,7 +60,6 @@ contract Callbacker {
             encryption_pub_key, // the encryption key of the owner
             new_pending_callback.serialize(), // the contents of the note, serialized
         );
-
     }
 
     #[aztec(private)]
@@ -76,7 +76,7 @@ contract Callbacker {
         let next_callback = storage.pending_callback_notes.get_notes(next_callback_filter)[0];
 
         if(next_callback.is_some()){
-            let _ = CallMeBackPrivateContextInterface::at(next_callback.unwrap_unchecked().beneficiary).callback(
+            let _ = CallMeBackPrivateContextInterface::at(next_callback.unwrap_unchecked().sender).callback(
                 &mut context,  
                 OriginalCallerCallbackStruct { inner: next_callback.unwrap_unchecked().beneficiary.to_field() },
                 6969

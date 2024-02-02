@@ -41,7 +41,7 @@ beforeAll(async () => {
   randomAccount = await createAccount(pxe);
 }, 120_000);
 
-describe.only("E2E Callback", () => {
+describe("E2E Callback", () => {
   beforeAll(async () => {
     const callbackerReceipt = await CallbackerContract.deploy(deployer)
       .send()
@@ -95,11 +95,7 @@ describe.only("E2E Callback", () => {
       it("should mine the transaction", async () => {
         const txReceipt = await callMeBack
           .withWallet(alice)
-          .methods.new_biparty_call(
-            AMOUNT,
-            callbacker.address,
-            bob.getAddress()
-          )
+          .methods.new_async_call(AMOUNT, callbacker.address, bob.getAddress())
           .send()
           .wait({ debug: true });
 
@@ -127,11 +123,11 @@ describe.only("E2E Callback", () => {
         expect(addressToCallbackParam).toEqual(callMeBack.address);
         expect(beneficiaryParam).toEqual(alice.getAddress());
         expect(valueParam.toBigInt()).toEqual(AMOUNT);
-        expect(noteOwner).toEqual(aliceAddress);
+        expect(noteOwner).toEqual(bobAddress);
       });
-      // });
+    });
 
-      // describe("resolve_call(...)", () => {
+    describe("resolve()", () => {
       it("should mine the transaction", async () => {
         const txReceipt = await callbacker
           .withWallet(bob)
