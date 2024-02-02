@@ -124,7 +124,7 @@ describe.only("E2E Callback", () => {
         const bobAddress = bob.getAddress();
 
         expect(allowdResolverParam).toEqual(bobAddress);
-        expect(addressToCallbackParam).toEqual(callbacker.address);
+        expect(addressToCallbackParam).toEqual(callMeBack.address);
         expect(beneficiaryParam).toEqual(alice.getAddress());
         expect(valueParam.toBigInt()).toEqual(AMOUNT);
         expect(noteOwner).toEqual(aliceAddress);
