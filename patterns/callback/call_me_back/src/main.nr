@@ -18,7 +18,7 @@ mod interfaces;
     This example uses a callback to set a value note for the original sender.
 */
 contract CallMeBack {
-    use crate::interfaces::Callbacker::{CallbackerPrivateContextInterface, AllowedAddressQueueNewCallStruct, BeneficiaryQueueNewCallStruct};
+    use crate::interfaces::Callbacker::{CallbackerPrivateContextInterface, AllowedAddressQueueNewCallStruct, BeneficiaryQueueNewCallStruct, BeneficiaryCallMeNowStruct};
     
     use dep::std::option::Option;
 
@@ -63,18 +63,31 @@ contract CallMeBack {
     /// @notice Constructor for the contract.
     #[aztec(private)]
     fn constructor() {}
-
+    
     /// @notice queue a new callback, triggerable by the given allowed address.
     #[aztec(private)]
-    fn new_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
+    fn new_biparty_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
 
         /* Insert whatever logic here */
-        
+
         let sender = context.msg_sender();
         let _ = CallbackerPrivateContextInterface::at(resolver).queue_new_call(
             &mut context,
             AllowedAddressQueueNewCallStruct { inner: allowed_address.to_field() },
             BeneficiaryQueueNewCallStruct { inner: sender.to_field() },
+            data
+        );
+    }
+
+    #[aztec(private)]
+    fn new_atomic_call(data: Field, resolver: AztecAddress) {
+
+        /* Insert whatever logic here */
+
+        let sender = context.msg_sender();
+        let _ = CallbackerPrivateContextInterface::at(resolver).call_me_now(
+            &mut context,
+            BeneficiaryCallMeNowStruct { inner: context.msg_sender().to_field() },
             data
         );
     }

@@ -8,6 +8,10 @@ use dep::aztec::protocol_types::{
   constants::RETURN_VALUES_LENGTH,
 };
 
+struct BeneficiaryCallMeNowStruct {
+  inner: Field,
+}
+
 struct AllowedAddressQueueNewCallStruct {
   inner: Field,
 }
@@ -36,6 +40,20 @@ impl CallbackerPrivateContextInterface {
     let mut serialized_args = [0; 0];
 
     context.call_private_function(self.address, FunctionSelector::from_field(0x2810e1d6), serialized_args)
+  }
+  
+
+  pub fn call_me_now(
+    self,
+    context: &mut PrivateContext,
+    beneficiary: BeneficiaryCallMeNowStruct,
+    value: Field
+  ) -> [Field; RETURN_VALUES_LENGTH] {
+    let mut serialized_args = [0; 2];
+    serialized_args[0] = beneficiary.inner;
+    serialized_args[1] = value;
+
+    context.call_private_function(self.address, FunctionSelector::from_field(0x20ea4afd), serialized_args)
   }
   
 

@@ -60,6 +60,19 @@ contract Callbacker {
             );
         }
     }
+
+    #[aztec(private)]
+    fn call_me_now(beneficiary: AztecAddress, value: Field) {
+
+        /* Insert some logic here */
+
+        let _ = CallMeBackPrivateContextInterface::at(context.msg_sender()).callback(
+            &mut context,  
+            OriginalCallerCallbackStruct { inner: beneficiary.to_field() },
+            6969
+        );
+    }
+
     
     unconstrained fn compute_note_hash_and_nullifier(contract_address: AztecAddress, nonce: Field, storage_slot: Field, preimage: [Field; VALUE_NOTE_LEN]) -> pub [Field; 4] {
         [0,0,0,0]
