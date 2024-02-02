@@ -2,7 +2,6 @@ import {
   AccountWalletWithPrivateKey,
   createPXEClient,
   ExtendedNote,
-  Fr,
   PXE,
   waitForPXE,
 } from "@aztec/aztec.js";
@@ -21,8 +20,8 @@ let callMeBack: CallMeBackContract;
 
 let alice: AccountWalletWithPrivateKey;
 let bob: AccountWalletWithPrivateKey;
+let charlie: AccountWalletWithPrivateKey;
 let deployer: AccountWalletWithPrivateKey;
-let randomAccount: AccountWalletWithPrivateKey;
 
 const AMOUNT = 6969n;
 
@@ -37,8 +36,8 @@ const setupSandbox = async () => {
 // Setup: Set the sandbox
 beforeAll(async () => {
   pxe = await setupSandbox();
-  [alice, bob, deployer] = await getInitialTestAccountsWallets(pxe);
-  randomAccount = await createAccount(pxe);
+  [alice, bob, charlie] = await getInitialTestAccountsWallets(pxe);
+  deployer = await createAccount(pxe);
 }, 120_000);
 
 describe("E2E Callback", () => {

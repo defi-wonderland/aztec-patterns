@@ -16,7 +16,11 @@ use dep::aztec::{
     hash::pedersen_hash
 };
 
-/// @member 
+/// @member owner: The address of the note owner, who can settle it (Bob)
+/// @member sender: The address which created this pending callback (the CallMeBack contract)
+/// @member beneficiary: The address of the callback beneficiary (Alice)
+/// @member data: The data associated to use for the callback
+/// @member header: The note header.
 struct PendingCallbackNote {
     owner: AztecAddress,
     sender: AztecAddress,
@@ -25,13 +29,17 @@ struct PendingCallbackNote {
     header: NoteHeader
 }
 
-/// @notice Declare the length of the note (excl header).
+/// @notice The length of the pending callback note excluding the header
 global PENDING_CALLBACK_NOTE_LEN: Field = 4;
 
-/// @notice Declare the methods of the note.
+/// @notice Implements the methods of the PendingCallbackNote
 impl PendingCallbackNote {
-    /// @notice Creates a new note.
-    /// @param 
+    /// @notice Creates a new PendingCallbackNote
+    /// @param owner The address of the note owner
+    /// @param sender The address of the callback request sender
+    /// @param beneficiary The address of the beneficiary
+    /// @param data The data associated with the note
+    /// @return A new instance of PendingCallbackNote
     pub fn new(
             owner: AztecAddress,
             sender: AztecAddress,
@@ -49,7 +57,8 @@ impl PendingCallbackNote {
 
     }
 
-    /// @notice Serializes a note into a preimage.
+    /// @notice Serializes the note into a preimage.
+    /// @return An array of fields representing the serialized note.
     pub fn serialize(self) -> [Field; PENDING_CALLBACK_NOTE_LEN] {
         [
             self.owner.to_field(),
@@ -60,6 +69,8 @@ impl PendingCallbackNote {
     }
 
     /// @notice Deserializes a note from a preimage.
+    /// @param preimage An array of fields representing the serialized note.
+    /// @return A new instance of PendingCallbackNote based on the provided preimage.
     pub fn deserialize(preimage: [Field; PENDING_CALLBACK_NOTE_LEN]) -> Self {
         PendingCallbackNote {
             owner: AztecAddress::from_field(preimage[0]),
@@ -70,26 +81,51 @@ impl PendingCallbackNote {
         }
     }
 
-    /// @notice Computes the note hash.
+    /// @notice Computes the hash of the note.
+    /// @dev Utilizes the Pedersen hash function to compute the hash of the serialized note.
+    /// @return The computed hash of the note.
     pub fn compute_note_hash(self) -> Field {
         dep::std::hash::pedersen_hash(serialize(self))
     }
     
-    pub fn compute_nullifier(self, _context: &mut PrivateContext) -> Field {
-        self.compute_nullifier_without_context()
+    /// @notice Computes the nullifier of the note with context.
+    /// @dev Placeholder for computing the nullifier with context, currently returns the result of `compute_nullifier_without_context`
+    /// @return The computed nullifier of the note.
+    fn compute_nullifier(self, context: &mut PrivateContext) -> Field {
+        let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PendingCallbackNoteMethods, self);
+        let secret = context.request_nullifier_secret_key(self.owner);
+        // TODO(#1205) Should use a non-zero generator index.
+        pedersen_hash([
+            note_hash_for_nullify,
+            secret.low,
+            secret.high,
+        ],0)
     }
 
-    pub fn compute_nullifier_without_context(self) -> Field {
-        let _ = self; // Avoid compiler warning (same # acir opcodes and backend size)
-        0
+    /// @notice Computes the nullifier of the note without context.
+    /// @dev Placeholder method that currently returns a default value, as we don't nullify in this example
+    /// @return The default nullifier value.
+    fn compute_nullifier_without_context(self) -> Field {
+        let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PendingCallbackNoteMethods, self);
+        let secret = get_nullifier_secret_key(self.owner);
+        // TODO(#1205) Should use a non-zero generator index.
+        pedersen_hash([
+            note_hash_for_nullify,
+            secret.low,
+            secret.high,
+        ],0)
     }
 
-    /// @notice Sets the note header.
+    /// @notice Sets the header of the note.
+    /// @param header The new header to be set for the note.
     pub fn set_header(&mut self, header: NoteHeader) {
         self.header = header;
     }
 
-    // Broadcasts the note to owner.
+    /// @notice Broadcasts the note to its owner.
+    /// @param context The private context of the contract.
+    /// @param slot The storage slot where the note is stored.
+    /// @dev Encrypts and emits a log containing the serialized note, intended for the note's owner.
     pub fn broadcast(self, context: &mut PrivateContext, slot: Field) {
         let encryption_pub_key = get_public_key(self.owner);
 

@@ -1,6 +1,8 @@
 mod types;
 mod interfaces;
 
+/// @title Callbacker Contract
+/// @notice This contract handles the callback logic for both atomic and async callbacks.
 contract Callbacker {
 
     use crate::interfaces::CallMeBack::{CallMeBackPrivateContextInterface, OriginalCallerCallbackStruct, ResolverNewAsyncCallStruct, AllowedAddressNewAsyncCallStruct};
@@ -30,10 +32,12 @@ contract Callbacker {
     
     global PENDING_CALLBACK_NOTE_SLOT = 1;
 
+    /// @notice Storage struct for pending callback notes
     struct Storage {
         pending_callback_notes: Set<PendingCallbackNote, PENDING_CALLBACK_NOTE_LEN>,
     }
 
+    /// @notice Initializes the storage with a new set of pending callback notes
     impl Storage {
         fn init(context: Context) -> Self {
             Storage {   
@@ -42,12 +46,20 @@ contract Callbacker {
         }
     }
  
+    /// @notice Constructor function, currently empty
     #[aztec(private)]
     fn constructor() {}
 
+    /// @notice Queues a new call for async callbacks
+    /// @param allowed_address The address allowed to resolve the callback (Bob in this case)
+    /// @param beneficiary The beneficiary of the callback (Alice in this case)
+    /// @param value The value associated with the callback
     #[aztec(private)]
     fn queue_new_call(allowed_address: AztecAddress, beneficiary: AztecAddress, value: Field) {
+        
+        // Create the new pending callback note, with the sender (call_me_back) as original caller
         let mut new_pending_callback = PendingCallbackNote::new(allowed_address, context.msg_sender(), beneficiary, value);
+
         storage.pending_callback_notes.insert(&mut new_pending_callback, false); // No broadcast for Alice needed, this is for Bob
 
         // Broadcast to Bob:
@@ -62,6 +74,7 @@ contract Callbacker {
         );
     }
 
+    /// @notice Resolves the next pending callback
     #[aztec(private)]
     fn resolve() {
 
@@ -81,9 +94,14 @@ contract Callbacker {
                 OriginalCallerCallbackStruct { inner: next_callback.unwrap_unchecked().beneficiary.to_field() },
                 6969
             );
+
+            storage.pending_callback_notes.remove(next_callback.unwrap_unchecked());
         }
     }
 
+    /// @notice Immediately calls back the beneficiary for atomic callbacks
+    /// @param beneficiary The beneficiary of the callback
+    /// @param value The value associated with the callback
     #[aztec(private)]
     fn call_me_now(beneficiary: AztecAddress, value: Field) {
 
@@ -96,6 +114,12 @@ contract Callbacker {
         );
     }
     
+    /// @notice Computes the note hash and nullifier for a given note
+    /// @param contract_address The address of the contract
+    /// @param nonce The nonce of the note
+    /// @param storage_slot The storage slot of the note
+    /// @param preimage The preimage of the note
+    /// @return The computed note hash and nullifier
     unconstrained fn compute_note_hash_and_nullifier(contract_address: AztecAddress, nonce: Field, storage_slot: Field, preimage: [Field; PENDING_CALLBACK_NOTE_LEN]) -> pub [Field; 4] {
         let note_header = NoteHeader::new(contract_address, nonce, storage_slot);
 

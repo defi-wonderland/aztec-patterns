@@ -3,26 +3,32 @@ mod interfaces;
 /*
     Callback pattern
     =====================
-    This is an example of a callback pattern in Aztec.
+    This is an example of callback patterns in Aztec.
+
+    In this example, the callback effect is to set a value note for the original sender.
+
+    Two types of callbacks are demonstrated: atomic and async.
 
     There are 2 contracts and 2 parties involved:
-    - call_me_back contract: initiate the flow and receiving the callback
-    - callbacker contract: store the pending callback and, when resolve() is called, process it
-    - Alice: calls the call_me_back contract
-    - Bob: trigger the logic on the callbacker contract
+    - Alice: initiate the flow and receive the effect of the callback
+    - Bob: trigger the logic on the Callbacker contract, if the callback is async (see below)
+    - CallMeBack contract: initiate the flow, calls Callbacker and receive the callback
+    - Callbacker contract: either store a pending callback (later resolved by bob) or trigger the callback immediately (if the callback is atomic)
 
-    alice calls queue_new_call with bob address as the one who needs to resolve it, bob calls resolve on the resolver contract, which calls the callback function.
-
-    this can be fully public - alive private then bob answer isn't private and the callback fn leaks it - fully private and callback effect if accessible for alice only
+    The atomic callback flow is as follow: Alice calls new_atomic_call on CallMeBack contract, which calls call_me_now on the resolver contract, which calls the callback function on CallMeBack contract.
+    The async callback flow is as follow: Alice calls new_async_call on CallMeBack contract, which calls queue_new_call on the resolver contract and stores the pending callback (in a note for Bob).
+    Later, Bob calls resolve on the resolver contract, which calls the callback function on CallMeBack contract.
     
-    This example uses a callback to set a value note for the original sender.
 */
 contract CallMeBack {
     use crate::interfaces::Callbacker::{CallbackerPrivateContextInterface, AllowedAddressQueueNewCallStruct, BeneficiaryQueueNewCallStruct, BeneficiaryCallMeNowStruct};
     
     use dep::std::option::Option;
 
-    use dep::value_note::value_note::{ValueNote, ValueNoteMethods, VALUE_NOTE_LEN};
+    use dep::value_note::{
+        value_note::{ValueNote, ValueNoteMethods, VALUE_NOTE_LEN},
+        balance_utils::get_balance
+    };
 
     use dep::aztec::context::Context;
     use dep::aztec::log::emit_encrypted_log;
@@ -42,9 +48,6 @@ contract CallMeBack {
     use dep::aztec::protocol_types::{
         address::AztecAddress,
     };
-
-    use dep::aztec::oracle::debug_log::{ debug_log };
-
 
     // Declaring the slots for the notes
     global CALLBACK_RESULT_NOTE_SLOT = 1;
@@ -67,13 +70,19 @@ contract CallMeBack {
     #[aztec(private)]
     fn constructor() {}
     
-    /// @notice queue a new callback, triggerable by the given allowed address.
+    /// @notice Queues a new callback, triggerable by the given allowed address, in the Callbacker contract
+    /// @param data The data to be passed to the callback.
+    /// @param resolver The address of the resolver contract.
+    /// @param allowed_address The address allowed to trigger the async callback.
     #[aztec(private)]
     fn new_async_call(data: Field, resolver: AztecAddress, allowed_address: AztecAddress) {
 
         /* Insert whatever logic here */
 
+        // Get Alice address
         let sender = context.msg_sender();
+
+        // Queue the new call in the Callbacker contract
         let _ = CallbackerPrivateContextInterface::at(resolver).queue_new_call(
             &mut context,
             AllowedAddressQueueNewCallStruct { inner: allowed_address.to_field() },
@@ -82,12 +91,18 @@ contract CallMeBack {
         );
     }
 
+    /// @notice Conduct an atomic callback.
+    /// @param data The data to be passed to the callback.
+    /// @param resolver The address of the resolver contract.
     #[aztec(private)]
     fn new_atomic_call(data: Field, resolver: AztecAddress) {
 
         /* Insert whatever logic here */
 
+        // Get Alice address
         let sender = context.msg_sender();
+
+        // Call the immediate callback in the Callbacker contract
         let _ = CallbackerPrivateContextInterface::at(resolver).call_me_now(
             &mut context,
             BeneficiaryCallMeNowStruct { inner: sender.to_field() },
@@ -95,16 +110,21 @@ contract CallMeBack {
         );
     }
 
+    /// @notice Handles the callback from the resolver contract, by creating a new value note for the original caller.
+    /// @param original_caller The address of the original caller of the callback.
+    /// @param value The value to be set in the callback result note.
     #[aztec(private)]
     fn callback(original_caller: AztecAddress, value: Field) {  
-    debug_log("000000000000000000000000000  CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK CALLBACK  000000000000000000000000");
-
-
         let mut new_value = ValueNote::new(value, original_caller);
         storage.callback_result_notes.insert(&mut new_value, true);
     }
     
-    ///@notice Computes note hash and nullifier.
+    /// @notice Computes note hash and nullifier for a given note.
+    /// @param contract_address The address of the contract associated with the note.
+    /// @param nonce The nonce of the note.
+    /// @param storage_slot The storage slot of the note.
+    /// @param preimage The preimage of the note.
+    /// @return The computed note hash and nullifier.
     unconstrained fn compute_note_hash_and_nullifier(contract_address: AztecAddress, nonce: Field, storage_slot: Field, preimage: [Field; VALUE_NOTE_LEN]) -> pub [Field; 4] {
         let note_header = NoteHeader::new(contract_address, nonce, storage_slot);
 
