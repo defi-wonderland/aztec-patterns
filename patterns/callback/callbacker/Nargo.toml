@@ -1,5 +1,5 @@
 [package]
-name = "callback_pattern"
+name = "callbacker"
 type = "contract"
 authors = ["wonderland"]
 compiler_version = ">=0.18.0"

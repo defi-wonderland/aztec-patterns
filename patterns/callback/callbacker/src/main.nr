@@ -1,8 +1,8 @@
 mod types;
 mod interfaces;
 
-contract Callback {
-    use crate::interfaces::callback::CallMeBackInterface;
+contract Callbacker {
+    use crate::interfaces::CallMeBack::{CallMeBackPrivateContextInterface, OriginalCallerCallbackStruct, ResolverNewCallStruct, AllowedAddressNewCallStruct};
     use crate::types::pending_callback_note::{PendingCallbackNote, PendingCallbackNoteMethods, PENDING_CALLBACK_NOTE_LEN};
 
     use dep::aztec::{
@@ -10,7 +10,7 @@ contract Callback {
         note::note_getter_options::NoteGetterOptions,
         protocol_types::address::AztecAddress,
         state_vars::set::Set
-    }
+    };
 
     use dep::std::option::Option;
 
@@ -41,6 +41,9 @@ contract Callback {
 
     #[aztec(private)]
     fn resolve() {
+
+        /* Insert whatever logic here */
+
         let caller = context.msg_sender();
 
         let next_callback_filter = NoteGetterOptions::new()
@@ -50,7 +53,11 @@ contract Callback {
         let next_callback = storage.pending_callback_notes.get_notes(next_callback_filter)[0];
 
         if(next_callback.is_some()){
-            let _ = CallMeBackInterface::at(next_callback.unwrap_unchecked().beneficiary.to_field()).callback(&mut context, next_callback.unwrap_unchecked().beneficiary, 6969);
+            let _ = CallMeBackPrivateContextInterface::at(next_callback.unwrap_unchecked().beneficiary).callback(
+                &mut context,  
+                OriginalCallerCallbackStruct { inner: next_callback.unwrap_unchecked().beneficiary.to_field() },
+                6969
+            );
         }
     }
     

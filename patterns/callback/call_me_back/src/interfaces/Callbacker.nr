@@ -2,7 +2,7 @@
   
 use dep::std;
 use dep::aztec::context::{ PrivateContext, PublicContext };
-use dep::protocol_types::{
+use dep::aztec::protocol_types::{
   address::AztecAddress,
   abis::function_selector::FunctionSelector,
   constants::RETURN_VALUES_LENGTH,
@@ -17,12 +17,12 @@ struct BeneficiaryQueueNewCallStruct {
 }
 
 
-// Interface for calling Callback functions from a private context
-struct CallbackPrivateContextInterface {
+// Interface for calling Callbacker functions from a private context
+struct CallbackerPrivateContextInterface {
   address: AztecAddress,
 }
 
-impl CallbackPrivateContextInterface {
+impl CallbackerPrivateContextInterface {
   pub fn at(address: AztecAddress) -> Self {
       Self {
           address,
@@ -59,12 +59,12 @@ impl CallbackPrivateContextInterface {
   
 
 
-// Interface for calling Callback functions from a public context
-struct CallbackPublicContextInterface {
+// Interface for calling Callbacker functions from a public context
+struct CallbackerPublicContextInterface {
   address: AztecAddress,
 }
 
-impl CallbackPublicContextInterface {
+impl CallbackerPublicContextInterface {
   pub fn at(address: AztecAddress) -> Self {
       Self {
           address,

@@ -2,12 +2,23 @@
   
 use dep::std;
 use dep::aztec::context::{ PrivateContext, PublicContext };
-use dep::protocol_types::{
+use dep::aztec::protocol_types::{
   address::AztecAddress,
   abis::function_selector::FunctionSelector,
   constants::RETURN_VALUES_LENGTH,
 };
 
+struct OriginalCallerCallbackStruct {
+  inner: Field,
+}
+
+struct ResolverNewCallStruct {
+  inner: Field,
+}
+
+struct AllowedAddressNewCallStruct {
+  inner: Field,
+}
 
 
 // Interface for calling CallMeBack functions from a private context
@@ -20,6 +31,35 @@ impl CallMeBackPrivateContextInterface {
       Self {
           address,
       }
+  }
+  
+  pub fn callback(
+    self,
+    context: &mut PrivateContext,
+    original_caller: OriginalCallerCallbackStruct,
+    value: Field
+  ) -> [Field; RETURN_VALUES_LENGTH] {
+    let mut serialized_args = [0; 2];
+    serialized_args[0] = original_caller.inner;
+    serialized_args[1] = value;
+
+    context.call_private_function(self.address, FunctionSelector::from_field(0x536a5c2c), serialized_args)
+  }
+  
+
+  pub fn new_call(
+    self,
+    context: &mut PrivateContext,
+    data: Field,
+    resolver: ResolverNewCallStruct,
+    allowed_address: AllowedAddressNewCallStruct
+  ) -> [Field; RETURN_VALUES_LENGTH] {
+    let mut serialized_args = [0; 3];
+    serialized_args[0] = data;
+    serialized_args[1] = resolver.inner;
+    serialized_args[2] = allowed_address.inner;
+
+    context.call_private_function(self.address, FunctionSelector::from_field(0xde38a790), serialized_args)
   }
   
 }
