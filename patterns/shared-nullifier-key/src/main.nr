@@ -29,9 +29,9 @@ contract SharedNullifierKey {
     };
     
 /*
-    Immediate Note Nullification
+    Shared Nullifier Key
     =====================
-    This file showcases the shared nullification key. Please refer to the README.md for a detailed explanation.
+    This file showcases the shared nullifier key pattern. Please refer to the README.md for a detailed explanation.
     This pattern consists of a note with a nullification key that's shared among many users, allowing for the nullification of the note to be done by any of them.
 
     The example code shown here is a toy contract made with the objective of fully isolating the pattern from any specific business logic. And because this patterns appears
@@ -101,11 +101,11 @@ contract SharedNullifierKey {
         // Set the sender for readability.
         let sender = context.msg_sender();
 
-        // Create a filter to ensure the note is not already created.
-        let example_note_filter = NoteGetterOptions::new().select(1, shared_nullifier).set_limit(1);
+        // Create a filter to fetch the note.
+        let shared_note_filter = NoteGetterOptions::new().select(1, shared_nullifier).set_limit(1);
 
         // Get the note.
-        let mut shared_note = storage.shared_notes.get_notes(example_note_filter)[0];
+        let mut shared_note = storage.shared_notes.get_notes(shared_note_filter)[0];
 
         // Ensure the note exists.
         assert(!shared_note.is_none(), "Note doesnt exist");

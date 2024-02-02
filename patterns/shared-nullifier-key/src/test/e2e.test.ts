@@ -35,7 +35,7 @@ import {
     }, 120_000);
 
   
-  describe("E2E Shared Note", () => {
+  describe("E2E Shared Nullifier", () => {
     beforeAll(async () => {
       const sharedNullifierKeyContract = await SharedNullifierKeyContract.deploy(deployer)
         .send()

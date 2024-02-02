@@ -30,7 +30,7 @@ global SHARED_NOTE_LEN: Field = 2;
 /// @notice Declare the methods of the note.
 impl SharedNote {
     /// @notice Creates a new note.
-    /// @param  _contex: the context. It's necessary to push the nullifier to the tree.
+    /// @param  _context: the context. It's necessary to push the nullifier to the tree.
     /// @param  owner the user who owns the note
     /// @param  shared_nullifier a random Field used for nullification of the note.
     pub fn new(
