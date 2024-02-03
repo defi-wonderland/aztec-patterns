@@ -92,18 +92,10 @@ impl PendingCallbackNote {
     /// @dev Placeholder for computing the nullifier with context, currently returns the result of `compute_nullifier_without_context`
     /// @return The computed nullifier of the note.
     fn compute_nullifier(self, context: &mut PrivateContext) -> Field {
-        let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PendingCallbackNoteMethods, self);
-        let secret = context.request_nullifier_secret_key(self.owner);
-        // TODO(#1205) Should use a non-zero generator index.
-        pedersen_hash([
-            note_hash_for_nullify,
-            secret.low,
-            secret.high,
-        ],0)
+        self.compute_nullifier_without_context()
     }
 
     /// @notice Computes the nullifier of the note without context.
-    /// @dev Placeholder method that currently returns a default value, as we don't nullify in this example
     /// @return The default nullifier value.
     fn compute_nullifier_without_context(self) -> Field {
         let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PendingCallbackNoteMethods, self);

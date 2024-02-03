@@ -20,10 +20,9 @@ let callMeBack: CallMeBackContract;
 
 let alice: AccountWalletWithPrivateKey;
 let bob: AccountWalletWithPrivateKey;
-let charlie: AccountWalletWithPrivateKey;
 let deployer: AccountWalletWithPrivateKey;
 
-const AMOUNT = 6969n;
+const AMOUNT = 1337n;
 
 const { PXE_URL = "http://localhost:8080" } = process.env;
 
@@ -36,8 +35,7 @@ const setupSandbox = async () => {
 // Setup: Set the sandbox
 beforeAll(async () => {
   pxe = await setupSandbox();
-  [alice, bob, charlie] = await getInitialTestAccountsWallets(pxe);
-  deployer = await createAccount(pxe);
+  [alice, bob, deployer] = await getInitialTestAccountsWallets(pxe);
 }, 120_000);
 
 describe("E2E Callback", () => {

@@ -1,8 +1,34 @@
 mod types;
 mod interfaces;
 
-/// @title Callbacker Contract
-/// @notice This contract handles the callback logic for both atomic and async callbacks.
+/*
+    Callback pattern
+    =====================
+    This is an example of callback patterns in Aztec.
+
+    In this example, the callback effect is to set a value note for the original sender.
+
+    Two types of callbacks are demonstrated: atomic and async.
+
+    There are 2 contracts and 2 parties involved:
+    - Alice: initiate the flow and receive the effect of the callback
+    - Bob: trigger the logic on the Callbacker contract, if the callback is async (see below)
+    - CallMeBack contract: initiate the flow, calls Callbacker and receive the callback
+    - Callbacker contract: either store a pending callback (later resolved by bob) or trigger the callback immediately (if the callback is atomic)
+
+    The atomic callback flow is as follow:
+    1. Alice calls `new_atomic_call(..)` on the `CallMeBack` contract
+    2. `new_atomic_call(..)` calls `calls call_me_now(..)` on the `Callbacker` contract
+    3. `call_me_now(..)` calls the `callback(..)` function on the `CallMeBack` contract.
+
+    The async callback flow is as follow:
+    - First transaction:
+    1. Alice calls `new_async_call(..)` on the `CallMeBack` contract,
+    2. `new_async_call(..)` calls `queue_new_call(..)` on the `Callbacker` contract and stores the pending callback (in a note for Bob).
+    - Second transaction:
+    1. Bob calls `resolve()` on the `Callbacker` contract
+    2. `resolve()` calls the `callback(..)` function on the `CallMeBack` contract.
+*/
 contract Callbacker {
 
     use crate::interfaces::CallMeBack::{CallMeBackPrivateContextInterface, OriginalCallerCallbackStruct, ResolverNewAsyncCallStruct, AllowedAddressNewAsyncCallStruct};
@@ -74,7 +100,7 @@ contract Callbacker {
         );
     }
 
-    /// @notice Resolves the next pending callback
+    /// @notice Resolves the next pending callback, for async callbacks
     #[aztec(private)]
     fn resolve() {
 
@@ -92,7 +118,7 @@ contract Callbacker {
             let _ = CallMeBackPrivateContextInterface::at(next_callback.unwrap_unchecked().sender).callback(
                 &mut context,  
                 OriginalCallerCallbackStruct { inner: next_callback.unwrap_unchecked().beneficiary.to_field() },
-                6969
+                1337
             );
 
             storage.pending_callback_notes.remove(next_callback.unwrap_unchecked());
@@ -110,7 +136,7 @@ contract Callbacker {
         let _ = CallMeBackPrivateContextInterface::at(context.msg_sender()).callback(
             &mut context,  
             OriginalCallerCallbackStruct { inner: beneficiary.to_field() },
-            6969
+            1337
         );
     }
     
