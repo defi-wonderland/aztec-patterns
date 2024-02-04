@@ -1,5 +1,4 @@
 mod broadcaster_interface;
-mod types;
  
 contract IntegratingContract { 
     use crate::broadcaster_interface::Broadcaster;
