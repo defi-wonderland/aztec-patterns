@@ -7,4 +7,6 @@ members = [
 "patterns/contracts-as-note-owners/trustless-manager",
 "patterns/multiparty-note-sharing/broadcaster",
 "patterns/multiparty-note-sharing/integrating-contract",
+"patterns/callback/call_me_back",
+"patterns/callback/callbacker"
 ]
