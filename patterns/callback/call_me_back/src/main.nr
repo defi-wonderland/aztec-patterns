@@ -30,30 +30,25 @@ mod interfaces;
 contract CallMeBack {
     use crate::interfaces::Callbacker::{CallbackerPrivateContextInterface, AllowedAddressQueueNewCallStruct, BeneficiaryQueueNewCallStruct, BeneficiaryCallMeNowStruct};
     
+    use dep::aztec::{
+        context::Context,
+        log::emit_encrypted_log,
+        note::{
+            note_getter_options::NoteGetterOptions,
+            note_header::NoteHeader,
+            note_interface::NoteInterface,
+            note_viewer_options::NoteViewerOptions,
+            utils as note_utils
+        },
+        protocol_types::address::AztecAddress,
+        state_vars::set::Set,
+    };
+
     use dep::std::option::Option;
 
     use dep::value_note::{
         value_note::{ValueNote, ValueNoteMethods, VALUE_NOTE_LEN},
         balance_utils::get_balance
-    };
-
-    use dep::aztec::context::Context;
-    use dep::aztec::log::emit_encrypted_log;
-    
-    use dep::aztec::note::{
-        note_getter_options::NoteGetterOptions,
-        note_header::NoteHeader,
-        note_interface::NoteInterface,
-        note_viewer_options::NoteViewerOptions,
-        utils as note_utils
-    };
-
-    use dep::aztec::state_vars::{
-        set::Set,
-    };
-
-    use dep::aztec::protocol_types::{
-        address::AztecAddress,
     };
 
     // Declaring the slots for the notes

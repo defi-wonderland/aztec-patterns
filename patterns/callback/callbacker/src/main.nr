@@ -44,14 +44,12 @@ contract Callbacker {
             nullifier_key::get_nullifier_secret_key,
             get_public_key::get_public_key,
         },
-    };
-
-    use dep::aztec::note::{
-        note_header::NoteHeader,
-        note_interface::NoteInterface,
-        note_viewer_options::NoteViewerOptions,
-        utils as note_utils,
-
+        note::{
+            note_header::NoteHeader,
+            note_interface::NoteInterface,
+            note_viewer_options::NoteViewerOptions,
+            utils as note_utils,  
+        }
     };
 
     use dep::std::option::Option;
