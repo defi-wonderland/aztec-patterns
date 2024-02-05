@@ -5,6 +5,7 @@ This repository contains a collection of useful development patterns for Aztec d
 1. [Note Sharing](https://github.com/defi-wonderland/aztec-patterns/blob/dev/patterns/note-sharing/README.md)
 1. [Contracts as Note Owners](https://github.com/defi-wonderland/aztec-patterns/blob/dev/patterns/contracts-as-note-owners/README.md)
 1. [Immediate Note Nullification](https://github.com/defi-wonderland/aztec-patterns/blob/dev/patterns/immediate-nullification/README.md)
+1. [Callback](https://github.com/defi-wonderland/aztec-patterns/blob/dev/patterns/callback/README.md)
 1. [Multiparty Note-Sharing](https://github.com/defi-wonderland/aztec-patterns/blob/dev/patterns/multiparty-note-sharing/README.md)
 ## Structure
 The general structure of the repository is as follows:
