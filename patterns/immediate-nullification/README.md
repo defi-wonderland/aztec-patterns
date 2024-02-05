@@ -7,6 +7,9 @@ We should keep in mind that if we were to do a check using a filter for the id i
 However, what if we pushed a nullifier to the nullifier tree upon creating a note? This is exactly what `ImmutableSingleton` and `Singleton` notes do when `initialize` is called in order to nullify the storage slot, but not the note itself.
 
 We can apply this same pattern to our custom notes.
+
+Before diving deeper, a word of caution: because the membership check of the nullifier is done by the [Base Rollup Circuit](https://docs.aztec.network/learn/concepts/circuits/rollup_circuits/main#base-rollup-circuit) users may not be aware that they are sending a wrong parameter - which can lead to accidental reverts. This pattern, therefore, should be used when we want to absolutely ensure a certain parameter or combination of parameters is not repeated.
+
 ## Implementation
 To implement this we have to keep in mind want we want to accomplish upon the creation of the note:
 1. We want to nullify a parameter or a combination of parameters 

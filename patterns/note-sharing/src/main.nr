@@ -6,27 +6,26 @@ contract SharedNote {
 
     use dep::std::option::Option;
 
-    use dep::aztec::context::Context;
-    use dep::aztec::log::emit_encrypted_log;
-    
-    use dep::aztec::note::{
-        note_getter_options::NoteGetterOptions,
-        note_header::NoteHeader,
-        note_interface::NoteInterface,
-        note_viewer_options::NoteViewerOptions,
-        utils as note_utils
-    };
-
-    use dep::aztec::oracle::{
-        get_public_key::get_public_key,
-        rand::rand,
-    };
-    use dep::aztec::state_vars::{
-        set::Set,
-    };
-
-    use dep::aztec::protocol_types::{
-        address::AztecAddress,
+    use dep::aztec::{
+        context::Context,
+        log::emit_encrypted_log,
+        note::{
+            note_getter_options::NoteGetterOptions,
+            note_header::NoteHeader,
+            note_interface::NoteInterface,
+            note_viewer_options::NoteViewerOptions,
+            utils as note_utils
+        },
+        oracle::{
+            get_public_key::get_public_key,
+            rand::rand,
+        },
+        protocol_types::{
+            address::AztecAddress,
+        },
+        state_vars::{
+            set::Set,
+        },
     };
     
 /*
