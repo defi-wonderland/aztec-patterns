@@ -20,12 +20,7 @@ use crate::types::{
 //                              Class                              //
 /////////////////////////////////////////////////////////////////////
 
-/// @notice a note containing the (immutable) game configuration
-/// @member divinity the address of the divinity used by the oracle
-/// @member private_oracle the address of the private oracle contract
-/// @member token the address of the token used for betting
-/// @member bet_amount the amount of tokens to bet
-/// @member header the note header
+
 struct PublicKeyNote {
     bjj_public_key: AffinePoint,
     header: NoteHeader
@@ -39,7 +34,6 @@ impl PublicKeyNote {
     //                         Public methods                          //
     /////////////////////////////////////////////////////////////////////
 
-    /// @notice create a new config note
     pub fn new(_bjj_public_key: AffinePoint) -> Self {
         PublicKeyNote {
             bjj_public_key: _bjj_public_key,
