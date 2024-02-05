@@ -77,11 +77,8 @@ fn create_request(question: Field, bob_address: AztecAddress) {
 
 And that would be it!
 
-### Multiparty Implementation
-If we wanted to extend this pattern to more than two participants, we would need to loop over each participant and emit an encrypted log with their respective public key. This has some issues:
-- Aztec has circuit limits, so we can't actually do this for a large amount of participants. See [Circuit Limitations](https://docs.aztec.network/dev_docs/limitations/main#circuit-limitations)
-- It would require to know all participants beforehand to be able to loop over them, which may result in an awkward implementation.
-In the **Real Examples** section, there's a repository with a function emitting the note to up to four participants.
+### Extension: Multiparty Implementation
+If we wanted to extend this pattern to more than two participants, some interesting things can happen and some new ideas arise. To read more about this continue with: [Multiparty Note-Sharing](https://github.com/defi-wonderland/aztec-patterns/blob/dev/patterns/multiparty-note-sharing/README.md).
 
 ### Real Examples
 - [Private Oracle](https://github.com/defi-wonderland/aztec-private-oracle): This repository displays a similar yet more complex and complete implementation to the one described above. In it, a requester can asks a question to a divinity (a chosen address), which will later answer that question and trigger a callback in exchange of a fee. The note sharing pattern can be seen in the `submit_question` function. It uses it twice. First it takes advantage of the `broadcast_escrow_note_for` function of the token escrow contract to share that contract's note with the requester and the divinity, and then it shares the question note with both of them.  
