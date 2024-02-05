@@ -102,7 +102,7 @@ impl EscrowNote {
     }
 
     /// @notice broadcasts the note to the owner as long as the owner is not a contract.
-    /// @dev    it's not emitted to contract owners as they don't have encryption keys.
+    /// @dev    it's not emitted to contracts as they don't have encryption keys.
     /// @param context the private context
     /// @param slot the slot where the note is stored in the contract
     pub fn broadcast(self, context: &mut PrivateContext, slot: Field) {

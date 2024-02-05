@@ -123,7 +123,7 @@ contract Broadcaster {
             assert(nonce == 0, "Invalid nonce");
         }
 
-        // This extra constraint is needed to avoid a compiler bug
+        // This extra constraint is needed to avoid a current compiler error [dynamic flatten array]
         if (!shared_note.owner.eq(AztecAddress::from_field(0))) {
             // Nullify the note.
             storage.shared_notes.remove(shared_note);

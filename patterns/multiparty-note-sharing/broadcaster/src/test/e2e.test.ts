@@ -37,7 +37,9 @@ import {
   // Setup: Set the sandbox
   beforeAll(async () => {
     pxe = await setupSandbox();
+    // This creates up to three accounts
     [user, user1, deployer] = await getInitialTestAccountsWallets(pxe);
+    // We need to create more accounts to test the sharing. This registers their PKs in our PXE.
     user2 = await createAccount(pxe);
     user3 = await createAccount(pxe);
     user4 = await createAccount(pxe);

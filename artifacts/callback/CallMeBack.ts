@@ -82,16 +82,16 @@ export class CallMeBackContract extends ContractBase {
   /** Type-safe wrappers for the public methods exposed by the contract. */
   public methods!: {
     
-    /** new_atomic_call(data: field, resolver: struct) */
-    new_atomic_call: ((data: FieldLike, resolver: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
-
-    /** callback(original_caller: struct, value: field) */
-    callback: ((original_caller: AztecAddressLike, value: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** new_async_call(data: field, resolver: struct, allowed_address: struct) */
+    new_async_call: ((data: FieldLike, resolver: AztecAddressLike, allowed_address: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
     /** compute_note_hash_and_nullifier(contract_address: struct, nonce: field, storage_slot: field, preimage: array) */
     compute_note_hash_and_nullifier: ((contract_address: AztecAddressLike, nonce: FieldLike, storage_slot: FieldLike, preimage: FieldLike[]) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
 
-    /** new_async_call(data: field, resolver: struct, allowed_address: struct) */
-    new_async_call: ((data: FieldLike, resolver: AztecAddressLike, allowed_address: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+    /** callback(original_caller: struct, value: field) */
+    callback: ((original_caller: AztecAddressLike, value: FieldLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
+
+    /** new_atomic_call(data: field, resolver: struct) */
+    new_atomic_call: ((data: FieldLike, resolver: AztecAddressLike) => ContractFunctionInteraction) & Pick<ContractMethod, 'selector'>;
   };
 }
