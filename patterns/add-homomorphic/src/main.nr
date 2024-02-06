@@ -1,6 +1,5 @@
 mod types;
 
-
 contract AdditiveHomomorphicEncryption { 
     use crate::types::{
         affine_point::{AffinePoint, AffinePointSerializationMethods, AFFINE_POINT_SERIALIZED_LEN},
