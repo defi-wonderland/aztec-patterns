@@ -1,14 +1,64 @@
 # Additive homomorphic encryption
 
-    This demonstrate the use of additive homomorphic encryption using exponential ElGamal (credit to Bank of BabyJubjub).
-    A detailed description of the ElGamal algorithm can be found here: https://en.wikipedia.org/wiki/ElGamal_encryption
-    as well as as the additive homormophic property of its exponential variant here:https://crypto.stackexchange.com/q/3626
+  This demonstrate the use of additive homomorphic encryption using exponential ElGamal (credit to Bank of BabyJubjub).
+  A detailed description of the ElGamal algorithm can be found here: https://en.wikipedia.org/wiki/ElGamal_encryption
+  as well as as the additive homormophic property of its exponential variant here:https://crypto.stackexchange.com/q/3626
 
-    This implementation uses the noir_elgamal library, which is an exponential ElGamal over the BabyJubjub curve.
+  This implementation uses the noir_elgamal library, which is an exponential ElGamal over the BabyJubjub curve.
 
-    This example demonstrates the use a few concepts:
-    - The obvious use of exponential ElGamal to have a public variable holding a counter that can be incremented by anyone,
-      without revealing the value of the counter.
-    - A pattern to initialize a public immutable variable mirroring a private variable (here, the public key of the counter,
-      allowing users to encrypt their values locally before sending them)
-    - Struct compositioning, to implement new point-related types, friendlier with notes (AffinePoint, ElgamalAffinePoints)
+  This example demonstrates the use a few concepts:
+  - The obvious use of exponential ElGamal to have a public variable holding a counter that can be incremented by anyone,
+    without revealing the value of the counter.
+  - A pattern to initialize a public immutable variable mirroring a private variable (here, the public key of the counter,
+    allowing users to encrypt their values locally before sending them)
+  - Struct compositioning, to implement new point-related types, friendlier with notes (AffinePoint, ElgamalAffinePoints)
+
+  ## Exponential ElGamal
+  Without diving into the details, ElGamal encryption is an asymmetric encryption algorithm, based on the difficulty of the discrete logarithm problem.
+  It is here applied over an elliptic curve, the BabyJubjub curve. The actual implementation is deffered to the noir_elgamal library, only the following
+  exposed api is relevant:
+  - onchain: `is_valid_subgroup(point)` verify is a point is part of the curve's subgroup
+  - onchain: `exp_elgamal_encrypt(public_key, message, random)` encrypt a message using the public key (the random value *must* be unique)
+  - offchain: 
+
+  ## Structure composition
+  This pattern allows extending the functions implementing a class, in a way similar to extending a class in obect-oriented languages.
+  For instance, elgamal_affine_point composes over affine_point, which in turn composes over Point:
+
+  ```rust
+  /// @notice A struct composing over the Point struct
+/// @member point<Point> An element representing a point on the Baby Jubjub curve.
+struct AffinePoint {
+    point: Point
+}
+
+/// @notice A struct representing the resulting ElGamal-encrypted points on the Baby Jubjub curve after performing encryption
+///         on a value
+/// @member C1 The point yielded by multiplying the base point of the Baby Jubjub curve by a provided randomness.
+/// @member C2 The point yielded by adding the resulting plain_embedded (plaintext * base point) to the shared_secret (randomness * public key)
+struct ElgamalAffinePoints {
+    C1: AffinePoint,
+    C2: AffinePoint
+}
+```
+The `eq` impl is then composed over:
+
+- in elgamal_affine_point
+```rust
+/// @notice Checks whether two ElgamalAffinePoints are equal (in the Baby Jubjub curve)
+/// @param second The second ElgamalAffinePoints to check
+fn eq(self, second: ElgamalAffinePoints) -> bool {
+    self.C1.eq(second.C1) * self.C2.eq(second.C2)
+}
+```
+- in affine_point
+```rust
+/// @notice Checks whether two AffinePoints are equal (in the Baby Jubjub curve)
+/// @param other The other AffinePoint to be compared
+fn eq(self, other: Self) -> bool {
+    self.point.eq(other.point)
+}
+```
+
+  ## Private/public initialization:
+  See the dedicated example

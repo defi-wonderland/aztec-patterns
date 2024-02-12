@@ -27,9 +27,9 @@ impl PublicKeyNote {
     /// @notice Creates a new PublicKeyNote instance.
     /// @param _bjj_public_key The BabyJubJub public key to be associated with this note.
     /// @return A new instance of PublicKeyNote.
-    pub fn new(_bjj_public_key: AffinePoint) -> Self {
+    pub fn new(bjj_public_key: AffinePoint) -> Self {
         PublicKeyNote {
-            bjj_public_key: _bjj_public_key,
+            bjj_public_key,
             header: NoteHeader::empty(),
         }
     }

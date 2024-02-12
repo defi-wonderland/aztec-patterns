@@ -52,8 +52,6 @@ contract AdditiveHomomorphicEncryption {
     This example demonstrates the use a few concepts:
     - The obvious use of exponential ElGamal to have a public variable holding a counter that can be incremented by anyone,
       without revealing the value of the counter.
-    - A pattern to initialize a public immutable variable mirroring a private variable (here, the public key of the counter,
-      allowing users to encrypt their values locally before sending them)
     - Struct compositioning, to implement new point-related types, friendlier with notes (AffinePoint, ElgamalAffinePoints)
 
 */
