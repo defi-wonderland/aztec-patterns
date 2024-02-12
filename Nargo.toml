@@ -9,5 +9,7 @@ members = [
 "patterns/multiparty-note-sharing/integrating-contract",
 "patterns/callback/call_me_back",
 "patterns/callback/callbacker",
-"patterns/add-homomorphic"
+"patterns/add-homomorphic",
+"patterns/private-public-mirroring",
 ]
+
