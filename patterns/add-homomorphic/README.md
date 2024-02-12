@@ -1,10 +1,10 @@
 # Additive homomorphic encryption
 
   This demonstrate the use of additive homomorphic encryption using exponential ElGamal (credit to Bank of BabyJubjub).
-  A detailed description of the ElGamal algorithm can be found here: https://en.wikipedia.org/wiki/ElGamal_encryption
-  as well as as the additive homormophic property of its exponential variant here:https://crypto.stackexchange.com/q/3626
+  A detailed description of the ElGamal algorithm can be found [here](https://en.wikipedia.org/wiki/ElGamal_encryption)
+  as well as as the additive homormophic property of its exponential variant [here](https://crypto.stackexchange.com/q/3626)
 
-  This implementation uses the noir_elgamal library, which is an exponential ElGamal over the BabyJubjub curve.
+  This implementation uses the [noir_elgamal library](https://github.com/jat9292/noir-elgamal), which is an exponential ElGamal over the BabyJubjub curve.
 
   This example demonstrates the use a few concepts:
   - The obvious use of exponential ElGamal to have a public variable holding a counter that can be incremented by anyone,
@@ -16,6 +16,8 @@
   It is here applied over an elliptic curve, the BabyJubjub curve. The actual implementation is deffered to the noir_elgamal library, only the following exposed api are relevants:
   - onchain: `is_valid_subgroup(point)` verify if a point is part of the curve's subgroup
   - onchain: `exp_elgamal_encrypt(public_key, message, random)` encrypt a message using the public key (the random value *must* be unique)
+
+  The decryption requires solving a discrete logarithm problem (to retrieve the encrypted message from c2), see the noir_elgamal repository for multiple implementations of such.
 
   ## Structure composition
   This pattern allows extending the functions implementing a class, in a way similar to extending a class in obect-oriented languages.
