@@ -58,14 +58,12 @@ contract AdditiveHomomorphicEncryption {
 
     // Declaring the storage slots
     global PUBLIC_ENCRYPTED_SUM_SLOT = 1;
-    global PUBLIC_KEY_PUBLIC_SLOT = 2;
-    global PUBLIC_KEY_PRIVATE_SLOT = 3;
+    global PUBLIC_KEY_PRIVATE_SLOT = 2;
 
     // Declaring storage
     struct Storage {
         ////////////////////////////// public //////////////////////////
         public_encrypted_sum: PublicState<ElgamalAffinePoints, ELGAMAL_AFFINE_POINTS_SERIALIZED_LEN>,
-        public_bjj_public_key: PublicState<AffinePoint, AFFINE_POINT_SERIALIZED_LEN>,
 
         ////////////////////////////// private //////////////////////////
         private_bjj_public_key: ImmutableSingleton<PublicKeyNote, PUBLIC_KEY_NOTE_SERIALIZED_LEN>,
@@ -81,11 +79,6 @@ contract AdditiveHomomorphicEncryption {
                             PUBLIC_ENCRYPTED_SUM_SLOT,
                             ElgamalAffinePointsSerializationMethods
                         ),
-                public_bjj_public_key: PublicState::new( 
-                    context,
-                    PUBLIC_KEY_PUBLIC_SLOT,
-                    AffinePointSerializationMethods,
-                ),
                 ////////////////////////////// private //////////////////////////
                 private_bjj_public_key: ImmutableSingleton::new(
                     context,
@@ -102,8 +95,8 @@ contract AdditiveHomomorphicEncryption {
 
     /// @notice Constructor for the contract.
     #[aztec(private)]
-    fn constructor(bjj_public_key: AffinePoint) {
-        // Sanity check: is the public key in the bjj field?
+    fn constructor(bjj_public_key: AffinePoint, randomness: Field) {
+        // Sanity check
         assert(noir_elgamal::is_valid_subgroup(bjj_public_key.point), "Invalid public key");
 
         // store the public key in private
@@ -115,18 +108,15 @@ contract AdditiveHomomorphicEncryption {
         let serialized_calldata = [
             bjj_public_key.point.x,
             bjj_public_key.point.y,
-            rand()
+            randomness
         ];
         context.call_public_function(context.this_address(), selector, serialized_calldata);
     }
 
-    /// @notice Initializes the public key variable and the encrypted sum
+    /// @notice Initializes the encrypted sum
     #[aztec(public)]
     internal fn _init_public(bjj_public_key_serialized: [Field; 2], randomness: Field) {
         let bjj_public_key = AffinePoint::deserialize(bjj_public_key_serialized);
-
-        // store the public key in public
-        storage.public_bjj_public_key.write(bjj_public_key);
 
         // encrypt "0"
         let (c1, c2) = noir_elgamal::exp_elgamal_encrypt(bjj_public_key.point, 0 as u40, randomness);
@@ -146,33 +136,14 @@ contract AdditiveHomomorphicEncryption {
 
     /// @notice Increments the counter by the given step
     #[aztec(private)]
-    fn increment(step: Field) {
+    fn increment(step: Field, randomness: Field) {
         
         // get the public key
         let public_key = storage.private_bjj_public_key.get_note();
 
         // encrypt the step
-        let (c1, c2) = noir_elgamal::exp_elgamal_encrypt(public_key.bjj_public_key.point, step as u40, rand());
+        let (c1, c2) = noir_elgamal::exp_elgamal_encrypt(public_key.bjj_public_key.point, step as u40, randomness);
 
-        let serialized_calldata = [
-            c1.x,
-            c1.y,
-            c2.x,
-            c2.y
-        ];
-
-        // call the public function which will add the encrypted step to the encrypted sum
-        let selector_update_bet_stats = FunctionSelector::from_signature("_update_cumsum([Field;2],[Field;2])");
-        context.call_public_function(context.this_address(), selector_update_bet_stats, serialized_calldata);
-    }
-
-    /////////////////////////////////////////////////////////////////////
-    //                             Public                              //
-    /////////////////////////////////////////////////////////////////////
-
-    /// @notice Increments the counter by a given step, the ElGamal encryption happening offchain
-    #[aztec(public)]
-    fn increment_public(C1_serialized: [Field;2], C2_serialized: [Field;2]) {
         let serialized_calldata = [
             c1.x,
             c1.y,
@@ -202,6 +173,13 @@ contract AdditiveHomomorphicEncryption {
         let new_encrypted_sum = current_encrypted_sum.add(encrypted_value_to_add);
 
         storage.public_encrypted_sum.write(new_encrypted_sum);
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    //                      Unconstrained public                       //
+    /////////////////////////////////////////////////////////////////////
+    unconstrained fn get_encrypted_counter() -> pub ElgamalAffinePoints {
+        storage.public_encrypted_sum.read()
     }
 
     ///@notice Computes note hash and nullifier.

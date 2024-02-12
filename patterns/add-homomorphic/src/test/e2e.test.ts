@@ -1,184 +1,156 @@
 import {
-    AccountWalletWithPrivateKey,
-    createPXEClient,
-    ExtendedNote,
-    Fr,
-    PXE,
-    waitForPXE,
-  } from "@aztec/aztec.js";
-  
-  import { SharedNullifierKeyContract } from "../../../../artifacts/shared-nullifier-key/SharedNullifierKey.js";
-  import { getInitialTestAccountsWallets } from "@aztec/accounts/testing";
-  
-  // Global variables
-  let pxe: PXE;
-  let sharedNullifier: SharedNullifierKeyContract;
-  let sharedKey: Fr;
-  
-  let alice: AccountWalletWithPrivateKey;
-  let bob: AccountWalletWithPrivateKey;
-  let deployer: AccountWalletWithPrivateKey;
-  
-  const { PXE_URL = 'http://localhost:8080' } = process.env;
-  
-  const setupSandbox = async () => {
-    const pxe = createPXEClient(PXE_URL);
-    await waitForPXE(pxe);
-    return pxe;
-  };
-  
-  // Setup: Set the sandbox
+  AccountWalletWithPrivateKey,
+  createPXEClient,
+  ExtendedNote,
+  Fr,
+  Note,
+  PXE,
+  waitForPXE,
+} from "@aztec/aztec.js";
+
+import { AdditiveHomomorphicEncryptionContract } from "../../../../artifacts/add-he/add-he/AdditiveHomomorphicEncryption.js";
+import {
+  createAccount,
+  getInitialTestAccountsWallets,
+} from "@aztec/accounts/testing";
+
+// Global variables
+let pxe: PXE;
+let counter: AdditiveHomomorphicEncryptionContract;
+
+let user1: AccountWalletWithPrivateKey;
+let user2: AccountWalletWithPrivateKey;
+let user3: AccountWalletWithPrivateKey;
+let deployer: AccountWalletWithPrivateKey;
+
+const BJJ_PRIVATE_KEY =
+  2360067582289791756090345803415031600606727745697750731963540090262281758098n;
+
+// Resulting public key on the BJJ curve when deriving from the BJJ_PRIVATE_KEY declared above
+// Use https://github.com/jat9292/babyjubjub-utils to generate new ones
+const PUBLIC_KEY_BJJ_X =
+  17330617431291011652840919965771789495411317073490913928764661286424537084069n;
+const PUBLIC_KEY_BJJ_Y =
+  12743939760321333065626220799160222400501486578575623324257991029865760346009n;
+const PUBLIC_KEY_BJJ = {
+  point: { x: PUBLIC_KEY_BJJ_X, y: PUBLIC_KEY_BJJ_Y },
+};
+
+// Randomness have been generated using a modified babyjubjub-utils that prints the randomness used when encrypting.
+const RANDOMNESS_INITIAL_ENCRYPTION =
+  2127434375679321579932213798607732554355166199806066497941655719367141499766n;
+const RANDOMNESS_USER_1 =
+  1438319796528918033583393704730685046956217498280656265812575377511832574392n;
+const RANDOMNESS_USER_2 =
+  1048079536491508724972388093791272936112538204421938605612284921668780878715n;
+const RANDOMNESS_USER_3 =
+  2115925703451186072229956066949536779308650088120047035594563780397884741597n;
+
+const FINAL_CUM_SUM_C1_X =
+  3919606867997237668040567668233747244452711745206604584349608308343594620673n;
+const FINAL_CUM_SUM_C1_Y =
+  14742875759735887788510420745824939173336243957508133148437004653480301110834n;
+const FINAL_CUM_SUM_C2_X =
+  521687571595162779479180406855798846599524023215386831438765875476136529268n;
+const FINAL_CUM_SUM_C2_Y =
+  6438471728501791047453348744695539915081915500069492754704209849111324891174n;
+const ENCRYPTED_SUM = {
+  C1: {
+    point: {
+      x: FINAL_CUM_SUM_C1_X,
+      y: FINAL_CUM_SUM_C1_Y,
+    },
+  },
+  C2: {
+    point: {
+      x: FINAL_CUM_SUM_C2_X,
+      y: FINAL_CUM_SUM_C2_Y,
+    },
+  },
+};
+
+const { PXE_URL = "http://localhost:8080" } = process.env;
+
+const setupSandbox = async () => {
+  const pxe = createPXEClient(PXE_URL);
+  await waitForPXE(pxe);
+  return pxe;
+};
+
+// Setup: Set the sandbox
+beforeAll(async () => {
+  pxe = await setupSandbox();
+  [user1, user2, user3] = await getInitialTestAccountsWallets(pxe);
+  deployer = await createAccount(pxe);
+}, 120_000);
+
+describe("E2E additive homomorphic encryption", () => {
   beforeAll(async () => {
-    pxe = await setupSandbox();
-    [alice, bob, deployer] = await getInitialTestAccountsWallets(pxe);
+    // Deploy the contract
+    const counterReceipt = await AdditiveHomomorphicEncryptionContract.deploy(
+      deployer,
+      PUBLIC_KEY_BJJ,
+      RANDOMNESS_INITIAL_ENCRYPTION
+    )
+      .send()
+      .wait();
 
-    }, 120_000);
+    counter = counterReceipt.contract;
 
-  
-  describe("E2E Shared Nullifier", () => {
-    beforeAll(async () => {
-      const sharedNullifierKeyContract = await SharedNullifierKeyContract.deploy(deployer)
+    // Add the note with the public key to the pxe - only for user1 as the same pxe is used by all
+    await pxe.addNote(
+      new ExtendedNote(
+        new Note([
+          new Fr(PUBLIC_KEY_BJJ.point.x),
+          new Fr(PUBLIC_KEY_BJJ.point.y),
+        ]),
+        user1.getAddress(),
+        counter.address,
+        new Fr(2),
+        counterReceipt.txHash
+      )
+    );
+  }, 200_000);
+
+  describe("increment(...)", () => {
+    it("user1 adds 1", async () => {
+      const txReceipt = await counter
+        .withWallet(user1)
+        .methods.increment(1n, RANDOMNESS_USER_1)
         .send()
         .wait();
-  
-      sharedNullifier = sharedNullifierKeyContract.contract;
-    }, 200_000);
 
-    describe("create_note(...)", () => {
-        let shared_key_nullifier_alice: Fr;
-        let shared_key_nullifier_bob: Fr;
-        let sharedNotes: ExtendedNote[]; 
+      expect(txReceipt.status).toBe("mined");
+    });
 
-        it("should not revert", async () => {
-            const txReceipt = await sharedNullifier
-            .withWallet(alice)
-            .methods.create_note(
-                bob.getAddress(),
-            )
-            .send()
-            .wait({debug: true});
+    it("user2 adds 1", async () => {
+      const txReceipt = await counter
+        .withWallet(user2)
+        .methods.increment(1n, RANDOMNESS_USER_2)
+        .send()
+        .wait();
 
-            const { visibleNotes } = txReceipt.debugInfo!;
-            sharedNotes = visibleNotes
+      expect(txReceipt.status).toBe("mined");
+    });
 
-            expect(txReceipt.status).toBe("mined");
-        })
-        
-        it("should create two notes", async () => {
-            expect(sharedNotes.length).toBe(2);
-        })
+    it("user3 adds 0", async () => {
+      const txReceipt = await counter
+        .withWallet(user3)
+        .methods.increment(0n, RANDOMNESS_USER_3)
+        .send()
+        .wait();
 
-        it("should create a note for alice with the correct parameters", async () => {
-            const ownerParam = sharedNotes[0].note.items[0];
-            const noteOwner = sharedNotes[0].owner;
-            
-            const aliceAddress = alice.getAddress();
-            
-            expect(ownerParam).toEqual(aliceAddress);
-            expect(noteOwner).toEqual(aliceAddress);
-            
-            shared_key_nullifier_alice = sharedNotes[0].note.items[1];
-        })
-        
-        it("should create a note for bob with the correct parameters", async () => {
-            const ownerParam = sharedNotes[1].note.items[0];
-            const noteOwner = sharedNotes[1].owner;
-
-            expect(ownerParam).toEqual(alice.getAddress());
-            expect(noteOwner).toEqual(bob.getAddress());
-
-            shared_key_nullifier_bob = sharedNotes[1].note.items[1];
-        })
-
-        it("nullifier key is the same between the 2 notes", async () => {
-            expect(shared_key_nullifier_alice).toEqual(
-                shared_key_nullifier_bob
-            );
-            sharedKey = shared_key_nullifier_alice;
-        });
-
-    })
-
-    describe("nullify_note_owner", () => {
-        let sharedNotes: ExtendedNote[]; 
-
-        it("should revert if the note doesnt exist", async () => {
-            let randomNullifier = Fr.random();
-            const txReceipt = sharedNullifier
-            .withWallet(alice)
-            .methods.nullify_note(randomNullifier)
-            .simulate();
-
-            await expect(txReceipt).rejects.toThrow(
-                "(JSON-RPC PROPAGATED) Assertion failed: Note doesnt exist '!shared_note.is_none()'"
-            );
-        })
-
-        it("should not revert when the owner tries to nullify the note", async () => {
-            const txReceipt = await sharedNullifier
-            .withWallet(alice)
-            .methods.nullify_note(
-                sharedKey
-            )
-            .send()
-            .wait({debug: true});
-
-            const { visibleNotes } = txReceipt.debugInfo!;
-            sharedNotes = visibleNotes
-
-            expect(txReceipt.status).toBe("mined");     
-        })
-
-        it("should nullify the note", async () => {
-           expect(sharedNotes.length).toBe(0);
-        })
-    })
-    
-
-    // Test that the recipient can also nullify the note despite the caller being the owner
-    describe("nullify_note_recipient", () => {
-        let sharedNotes: ExtendedNote[];
-        let nullifierKey: Fr;
-
-        // we have to create a new set of notes because the previous one was nullified by the owner 
-        beforeAll(async () => {
-            const txReceipt = await sharedNullifier
-            .withWallet(alice)
-            .methods.create_note(
-                bob.getAddress(),
-            )
-            .send()
-            .wait({debug: true});
-
-            const { visibleNotes } = txReceipt.debugInfo!;
-            sharedNotes = visibleNotes
-            
-            expect(txReceipt.status).toBe("mined");
-
-            nullifierKey = sharedNotes[0].note.items[1];
-        })
-
-        it("should create two notes", async () => {
-            expect(sharedNotes.length).toBe(2);
-        })
-
-        it("should not revert when the recipient tries to nullify the note", async () => {
-            const txReceipt = await sharedNullifier
-            .withWallet(bob)
-            .methods.nullify_note(
-                nullifierKey
-            )
-            .send()
-            .wait({debug: true});
-
-            const { visibleNotes } = txReceipt.debugInfo!;
-            sharedNotes = visibleNotes
-
-            expect(txReceipt.status).toBe("mined");     
-        })
-
-        it("should nullify the note", async () => {
-           expect(sharedNotes.length).toBe(0);
-        })
-    })
+      expect(txReceipt.status).toBe("mined");
+    });
   });
+
+  describe("get_encrypted_counter()", () => {
+    it("should return the correct encrypted sum", async () => {
+      const encrypted_counter = await counter.methods
+        .get_encrypted_counter()
+        .view();
+
+      expect(encrypted_counter).toStrictEqual(ENCRYPTED_SUM);
+    });
+  });
+});

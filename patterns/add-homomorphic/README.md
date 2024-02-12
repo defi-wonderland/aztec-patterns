@@ -9,17 +9,13 @@
   This example demonstrates the use a few concepts:
   - The obvious use of exponential ElGamal to have a public variable holding a counter that can be incremented by anyone,
     without revealing the value of the counter.
-  - A pattern to initialize a public immutable variable mirroring a private variable (here, the public key of the counter,
-    allowing users to encrypt their values locally before sending them)
   - Struct compositioning, to implement new point-related types, friendlier with notes (AffinePoint, ElgamalAffinePoints)
 
   ## Exponential ElGamal
   Without diving into the details, ElGamal encryption is an asymmetric encryption algorithm, based on the difficulty of the discrete logarithm problem.
-  It is here applied over an elliptic curve, the BabyJubjub curve. The actual implementation is deffered to the noir_elgamal library, only the following
-  exposed api is relevant:
-  - onchain: `is_valid_subgroup(point)` verify is a point is part of the curve's subgroup
+  It is here applied over an elliptic curve, the BabyJubjub curve. The actual implementation is deffered to the noir_elgamal library, only the following exposed api are relevants:
+  - onchain: `is_valid_subgroup(point)` verify if a point is part of the curve's subgroup
   - onchain: `exp_elgamal_encrypt(public_key, message, random)` encrypt a message using the public key (the random value *must* be unique)
-  - offchain: 
 
   ## Structure composition
   This pattern allows extending the functions implementing a class, in a way similar to extending a class in obect-oriented languages.
@@ -60,5 +56,5 @@ fn eq(self, other: Self) -> bool {
 }
 ```
 
-  ## Private/public initialization:
-  See the dedicated example
+### Real Examples
+- [Coin Toss](https://github.com/defi-wonderland/aztec-coin-toss-pvp): This contract allows players to bet on the outcome of a coin toss. The pattern is used to count the number of tails without having the players knowing the current sum. Once the bet is settled (ie a third party "declares" the result of the coin flip), this number of tails is then decrypted and used to compute the number of winners, sharing the pot.
