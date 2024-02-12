@@ -1,11 +1,9 @@
 mod types;
 
-contract AdditiveHomomorphicEncryption { 
+contract PrivatePublicMirroring { 
     use crate::types::{
         private_variable_note::{PrivateVariableNote, PrivateVariableNoteMethods, PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN}
     };
-
-    use dep::noir_elgamal;
         
     use dep::std::option::Option;
 
@@ -27,7 +25,7 @@ contract AdditiveHomomorphicEncryption {
             rand::rand
         },
         state_vars::{
-            immutable_singleton::ImmutableSingleton,
+            singleton::Singleton,
             public_state::PublicState
         },
         protocol_types::{
@@ -44,7 +42,7 @@ contract AdditiveHomomorphicEncryption {
     supply of a token secondary exposes mint/burn calls and associated values).
 
     This example demonstrate this pattern in the context of a constructor which sets the private side then calls the internal public function to initialize
-    the public side.
+    the public side of an immutable variable.
     The public function is internal, preventing any furtheruncontrolled access.
 
 */
@@ -59,7 +57,7 @@ contract AdditiveHomomorphicEncryption {
         public_variable: PublicState<Field, FIELD_SERIALIZED_LEN>,
 
         ////////////////////////////// private //////////////////////////
-        private_variable: ImmutableSingleton<PrivateVariableNote, PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN>,
+        private_variable: Singleton<PrivateVariableNote, PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN>,
     }
 
     // Declaring storage implementation
@@ -73,7 +71,7 @@ contract AdditiveHomomorphicEncryption {
                             FieldSerializationMethods
                         ),
                 ////////////////////////////// private //////////////////////////
-                private_variable: ImmutableSingleton::new(
+                private_variable: Singleton::new(
                     context,
                     PRIVATE_VARIABLE_SLOT,
                     PrivateVariableNoteMethods,
@@ -88,12 +86,25 @@ contract AdditiveHomomorphicEncryption {
 
     /// @notice Constructor for the contract.
     #[aztec(private)]
-    fn constructor(variable_value: Field) {
-        // store the variable in private
-        let mut var_note = PrivateVariableNote::new(variable_value);
-        storage.private_variable.initialize(&mut var_note, Option::none(), false);
+    fn constructor() {
+    }
 
-        // Store the variavle in public
+    /// @notice sender is address 0 when deploying, use this helper to set the initial correct note owner
+    #[aztec(private)]
+    fn init() {
+        let mut var_note = PrivateVariableNote::new(0, context.msg_sender());
+        storage.private_variable.initialize(&mut var_note, Option::none(), true);
+    }
+
+    /// @notice update the private/public variables
+    /// @params variable_value the new value
+    #[aztec(private)]
+    fn update_private(variable_value: Field) {
+        // store the variable in private
+        let mut var_note = PrivateVariableNote::new(variable_value, context.msg_sender());
+        storage.private_variable.replace(&mut var_note, true);
+
+        // Store the variable in public
         let selector = FunctionSelector::from_signature("_init_public(Field)");
         let serialized_calldata = [
             variable_value
@@ -102,6 +113,8 @@ contract AdditiveHomomorphicEncryption {
     }
 
     /// @notice Initializes the value
+    /// @dev    Internal, preventing other calls than from `update_private`
+    /// @params variable_value the new value
     #[aztec(public)]
     internal fn _init_public(variable_value: Field) {
         storage.public_variable.write(variable_value);
@@ -110,7 +123,8 @@ contract AdditiveHomomorphicEncryption {
     /////////////////////////////////////////////////////////////////////
     //                      Unconstrained public                       //
     /////////////////////////////////////////////////////////////////////
-
+    
+    /// @notice getter for the public value
     unconstrained fn get_public_variable_value() -> pub Field {
         storage.public_variable.read()
     }

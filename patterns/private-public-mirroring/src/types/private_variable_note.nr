@@ -3,27 +3,41 @@
     note::{
         note_header::NoteHeader,
         note_interface::NoteInterface,
+        utils::compute_note_hash_for_read_or_nullify,
     },
+    oracle::{
+        get_public_key::get_public_key,
+        nullifier_key::get_nullifier_secret_key,
+    },
+    protocol_types::{
+        address::AztecAddress,
+    },
+    log::emit_encrypted_log,
+    hash::pedersen_hash,
 };
  
 /// @title PrivateVariableNote
-/// @member my_variable The BabyJubJub public key to be associated with this note.
+/// @member my_variable the value stored
+/// @member owner the note owner
 /// @member header The NoteHeader of the PrivateVariableNote.
 struct PrivateVariableNote {
     my_variable: Field,
+    owner: AztecAddress,
     header: NoteHeader
 }
 
-global PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN: Field = 1;
+global PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN: Field = 2;
 
 impl PrivateVariableNote {
     
     /// @notice Creates a new PrivateVariableNote instance.
-    /// @param _my_variable The BabyJubJub public key to be associated with this note.
+    /// @param my_variable the value
+    /// @param owner the note owner
     /// @return A new instance of PrivateVariableNote.
-    pub fn new(my_variable: Field) -> Self {
+    pub fn new(my_variable: Field, owner: AztecAddress) -> Self {
         PrivateVariableNote {
             my_variable,
+            owner,
             header: NoteHeader::empty(),
         }
     }
@@ -31,7 +45,7 @@ impl PrivateVariableNote {
     /// @notice Serializes the PrivateVariableNote into a fixed-size array.
     /// @return An array representing the serialized PrivateVariableNote.
     fn serialize(self) -> [Field; PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN] {
-        [self.my_variable]
+        [self.my_variable, self.owner.to_field()]
     }
 
     /// @notice Deserializes a fixed-size array into a PrivateVariableNote.
@@ -40,6 +54,7 @@ impl PrivateVariableNote {
     fn deserialize(preimage: [Field; PRIVATE_VARIABLE_NOTE_SERIALIZED_LEN]) -> Self {
         PrivateVariableNote {
             my_variable: preimage[0],
+            owner: AztecAddress::from_field(preimage[1]),
             header: NoteHeader::empty(), 
         }
     }
@@ -48,23 +63,32 @@ impl PrivateVariableNote {
     /// @return The computed hash as a Field element.
     fn compute_note_hash(self) -> Field {
         dep::std::hash::pedersen_hash([
-            self.my_variable
+            self.my_variable,
+            self.owner.to_field()
         ])
     }
-    /// @notice Computes the nullifier of the PrivateVariableNote.
-    /// @dev This note isn't nullifiable, hence it returns 0.
-    /// @param _context The private context (unused).
-    /// @return Always returns 0.
-    fn compute_nullifier(self, _context: &mut PrivateContext) -> Field {
-        self.compute_nullifier_without_context()
+
+    /// @notice compute a nullifier
+    /// @param context
+    /// @return the nullifier
+    fn compute_nullifier(self, context: &mut PrivateContext) -> Field {
+        let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PrivateVariableNoteMethods, self);
+        let secret = context.request_nullifier_secret_key(self.owner);
+        pedersen_hash([
+            note_hash_for_nullify,
+            secret.high,
+            secret.low,
+        ],0)
     }
 
-    /// @notice Computes the nullifier of the PrivateVariableNote without a context.
-    /// @dev This note isn't nullifiable, hence it returns 0.
-    /// @return Always returns 0.
     fn compute_nullifier_without_context(self) -> Field {
-         let _ = self; // Avoid compiler warning (same # acir opcodes and backend size)
-         0
+        let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PrivateVariableNoteMethods, self);
+        let secret = get_nullifier_secret_key(self.owner);
+        pedersen_hash([
+            note_hash_for_nullify,
+            secret.high,
+            secret.low,
+        ],0)
     }
 
     /// @notice Sets the header of the PrivateVariableNote.
@@ -74,14 +98,18 @@ impl PrivateVariableNote {
     }
 
     /// @notice Broadcasts the PrivateVariableNote.
-    /// @dev This note isn't private, hence there's no owner to broadcast to.
-    /// @param context The private context (unused).
-    /// @param slot The slot (unused).
+    /// @param context The private context
+    /// @param slot The slot
     fn broadcast(self, context: &mut PrivateContext, slot: Field) {
-        // no owner == no broadcast
-        let _ = self; // Avoid compiler warning (same # acir opcodes and backend size)
-        let __ = context;
-        let ___ = slot;
+        let encryption_pub_key = get_public_key(self.owner);
+
+        emit_encrypted_log(
+            context,
+            (*context).this_address(),
+            slot,
+            encryption_pub_key,
+            self.serialize(),
+        );
     }
 }
  
