@@ -1,6 +1,11 @@
 # Additive homomorphic encryption
 
   This demonstrate the use of additive homomorphic encryption using exponential ElGamal (credit to Bank of BabyJubjub).
+
+  Having a public encrypted value is, for instance, relevant for value frequently updated (avoiding repetitive note creation/nullification) and
+  for which having a privacy leak to some degree isn't too detrimental (as a public value changes, one can trace back which address has been
+  updating this variable, but cannot know what the exact change was).
+ 
   A detailed description of the ElGamal algorithm can be found [here](https://en.wikipedia.org/wiki/ElGamal_encryption)
   as well as as the additive homormophic property of its exponential variant [here](https://crypto.stackexchange.com/q/3626)
 
