@@ -32,7 +32,7 @@ beforeAll(async () => {
   [deployer] = await getInitialTestAccountsWallets(pxe);
 }, 120_000);
 
-describe.only("E2E private public mirror", () => {
+describe("E2E private public mirror", () => {
   let notesCreated: ExtendedNote[];
 
   beforeAll(async () => {

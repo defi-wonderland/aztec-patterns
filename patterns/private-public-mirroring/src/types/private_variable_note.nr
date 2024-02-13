@@ -72,13 +72,7 @@ impl PrivateVariableNote {
     /// @param context
     /// @return the nullifier
     fn compute_nullifier(self, context: &mut PrivateContext) -> Field {
-        let note_hash_for_nullify = compute_note_hash_for_read_or_nullify(PrivateVariableNoteMethods, self);
-        let secret = context.request_nullifier_secret_key(self.owner);
-        pedersen_hash([
-            note_hash_for_nullify,
-            secret.high,
-            secret.low,
-        ],0)
+        self.compute_nullifier_without_context()
     }
 
     fn compute_nullifier_without_context(self) -> Field {
