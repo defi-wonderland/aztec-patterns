@@ -17,7 +17,10 @@ The atomic callback flow is as follow:
 2. `new_atomic_call(..)` calls `calls call_me_now(..)` on the `Callbacker` contract
 3. `call_me_now(..)` calls the `callback(..)` function on the `CallMeBack` contract.
 
-This is a callback often used in flashloans (the callback implementing the logic to execute after the flashloan has been taken) or in AMM swaps (to handle the token transfer to the pool)
+This is a callback often used in flashloans (the callback implementing the logic to execute after the flashloan has been taken) or in AMM swaps (to handle the token transfer to the pool).
+
+> Please note that Aztec does not support (yet) getting a note within the same transaction as it was created, the note is therefore created but not consumable within `new_atomic_call(..)`.
+> This is an active area of research and might be supported in future releases.
 
 The async callback flow is as follow:
 - First transaction:

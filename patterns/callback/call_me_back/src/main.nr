@@ -110,6 +110,9 @@ contract CallMeBack {
             BeneficiaryCallMeNowStruct { inner: sender.to_field() },
             data
         );
+
+        /* More logic here */
+        // The note created in the callback is *not* accessible yet (see the readme for further details)
     }
 
     /// @notice Handles the callback from the resolver contract, by creating a new value note for the original caller.
