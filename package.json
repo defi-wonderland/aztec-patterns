@@ -15,7 +15,9 @@
     "codegen:broadcaster": "aztec-cli codegen target/broadcaster-Broadcaster.json -o artifacts/multiparty-note-sharing/broadcaster --ts",
     "codegen:integrating-contract": "aztec-cli codegen target/integrating_contract-IntegratingContract.json -o artifacts/multiparty-note-sharing/integrating-contract --ts",
     "codegen:trustless-manager": "aztec-cli codegen target/trustless_manager-TrustlessManager.json -o artifacts/contracts-as-note-owners/trustless-manager --ts",
-    "codegen:all": "yarn codegen:note-sharing && yarn codegen:callback1 && yarn codegen:callback2 && yarn codegen:immediate-nullification && yarn codegen:token && yarn codegen:escrow && yarn codegen:trustless-manager && yarn codegen:shared-nullifier-key && yarn codegen:broadcaster && yarn codegen:integrating-contract",
+    "codegen:add-he": "aztec-cli codegen target/add_he-AdditiveHomomorphicEncryption.json -o artifacts/add-he/add-he --ts",
+    "codegen:priv-pub": "aztec-cli codegen target/private_public_mirroring-PrivatePublicMirroring.json -o artifacts/private-public-mirroring --ts",
+    "codegen:all": "yarn codegen:note-sharing && yarn codegen:callback1 && yarn codegen:callback2 && yarn codegen:immediate-nullification && yarn codegen:token && yarn codegen:escrow && yarn codegen:trustless-manager && yarn codegen:shared-nullifier-key && yarn codegen:broadcaster && yarn codegen:integrating-contract && yarn codegen:add-he && yarn codegen:priv-pub",
     "build:contracts": "yarn compile && yarn codegen:all",
     "test": "yarn build:contracts && NODE_NO_WARNINGS=1 node --experimental-vm-modules $(yarn bin jest) --runInBand --passWithNoTests --testTimeout=30000"
   },
