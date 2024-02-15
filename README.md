@@ -16,3 +16,11 @@ The general structure of the repository is as follows:
 - `patterns/<name_of_pattern>/src/main.nr:` contains the pattern's code.
 - `patterns/<name_of_pattern>/src/test/e2e.test.ts:` contains the pattern's tests.
 - `patterns/<name_of_pattern>/src/types/<note_name>.nr:` contains the implementation of notes used for that pattern
+
+## Contributing
+If you have been developing in Aztec and found interesting patterns we have not added to the book, pull requests are more than welcome. Before you open one, please:
+- Match the structure of the other patterns
+- Thoroughly explain the pattern in the simplest possible way
+- Add isolated code to showcase the pattern
+- Test the code to ensure it works
+- Add real examples where the pattern is used in more complex code
